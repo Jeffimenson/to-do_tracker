@@ -1,3 +1,12 @@
+// Dom manipulation 
+function query(selector, parent=document){
+    return parent.querySelector(selector);
+}
+
+function queryAll(selector, parent=document){
+    return parent.querySelectorAll(selector);
+}
+
 function make(selector, parent){
     let lastInd = getNextSeparator(0, selector);
     
@@ -37,17 +46,26 @@ function make(selector, parent){
     return newElement;
     
 }
+    function getNextSeparator(start, selector){
+        const nextHash = selector.indexOf('#', start);
+        const nextDot = selector.indexOf('.', start);
 
-function getNextSeparator(start, selector){
-    const nextHash = selector.indexOf('#', start);
-    const nextDot = selector.indexOf('.', start);
-
-    if (nextHash === -1){
-        return nextDot;
-    } else if (nextDot === -1){
-        return nextHash;
+        if (nextHash === -1){
+            return nextDot;
+        } else if (nextDot === -1){
+            return nextHash;
+        }
+        return (nextHash > nextDot) ? nextDot : nextHash;
     }
-    return (nextHash > nextDot) ? nextDot : nextHash;
+
+// Object stuff
+const Factory = {
+    produce(proto, publicObj={}){
+        return Object.assign(Object.create(proto), publicObj);
+    }
 }
 
-export {make}; 
+
+
+// export statement
+export {make, query, Factory}; 
