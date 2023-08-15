@@ -151,4 +151,76 @@ class QuestGroup {
     }
 }
 
-export {Task, Quest, QuestGroup};
+
+function DailyTime(hour, minute){
+    return {
+        hour, 
+        minute
+    }
+}
+
+const Day = {
+    Sun: 0,
+    Mon: 1,
+    Tue: 2, 
+    Wed: 3,
+    Thu: 4,
+    Fri: 5,
+    Sat: 6
+};
+
+function WeeklyTime(day, hour, minute){
+    return {
+        day, 
+        hour,
+        minute
+    }
+}
+
+class StaticQuestGroup extends QuestGroup {
+    makeQuest(name, tasks, due){
+        const qst = new Quest(name, tasks, due);
+        this.addQuest(qst);
+    }
+}
+
+class DailyQuestGroup extends QuestGroup {
+    makeQuest(name, tasks, time){
+        const date = new Date();
+        date.setHours(time.hour, time.minute, 0);
+
+        const qst = new Quest(name, tasks, date);
+        this.addQuest(qst);
+    }
+
+    resetQuests(){
+        for (let i = 0; i < this.quests.length; i++){
+            const currQuest = this.getQuest(i);
+            const dueTime = currQuest.dueDate;
+            const newTime = new Date();
+            newTime.setHours(dueTime.getHours(), dueTime.getMinutes());
+
+            currQuest.dueDate = newTime;
+
+            if (currQuest.completionDate !== null) currQuest.resetCompletionDate();
+        }
+    }
+}
+
+class WeeklyQuestGroup extends QuestGroup {
+
+    makeQuest(name, tasks, weeklyTime){
+        const date = new Date();
+
+        const dayDiff = date.getDay() - weeklyTime.day; 
+        const dayOfMonth = date.getDate() - dayDiff; 
+        date.setDate(dayOfMonth);
+
+        date.setHours(weeklyTime.hour, weeklyTime.minute, 0);
+        
+        const qst = new Quest(name, tasks, date);
+        this.addQuest(qst);
+    }
+}
+
+export {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime};
