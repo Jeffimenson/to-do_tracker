@@ -80,8 +80,7 @@ class QuestGroup {
 
     constructor(){}
     
-    addQuest(name, tasks){
-        const newQuest = new Quest(name, tasks);
+    addQuest(newQuest){
         this.#quests.push(newQuest);
     }
 
