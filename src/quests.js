@@ -1,4 +1,4 @@
-import { isThisWeek, differenceInDays, compareAsc } from "date-fns";
+import { differenceInDays, compareAsc } from "date-fns";
 
 function getDaysOld(date){ //To be used to check if completed tasks and quests are older than 2 days
     const today = new Date();
@@ -22,6 +22,10 @@ class Task {
         this.isOptional = isOptional;
     }
 
+    get completionDate (){
+        return this.#completionDate;
+    }
+
     trackCompletionDate(){
         this.#completionDate = new Date();
     }
@@ -35,10 +39,31 @@ class Quest {
     name; 
 
     dueDate;
-    #completionDate;
+    #completionDate = null;
+    get completionDate (){
+        return this.#completionDate;
+    }
+
+    resetCompletionDate(){
+        this.#completionDate = null;
+    }
 
     #tasks = [];
-    #completedTasks = [];
+
+    get tasks (){
+        return this.#tasks;
+    }
+
+    get completedTasks (){
+        const completed = [];
+        for (let i = 0; i < this.#tasks.length; i++){
+            const task = this.#tasks[i];
+            if (task.completionDate !== null){
+                completed.push(task);
+            }
+        }
+        return completed;
+    }
 
     constructor (name, tasks=[], dueDate=null){
         this.name = name; 
@@ -57,12 +82,10 @@ class Quest {
     completeTask(index){
         const task = this.#tasks[index];
         task.trackCompletionDate();
-        this.#completedTasks.unshift(task);
-        this.removeTask(index);
     }
     
     shouldBeComplete(){
-        return this.#tasks.length === 0 && this.#completedTasks > 0;
+        return this.#tasks.length === 0 && this.completedTasks.length > 0;
     }
 
     trackCompletionDate(){
@@ -76,9 +99,22 @@ class Quest {
 
 class QuestGroup {
     #quests = [];
-    #completedQuests = []; 
 
     constructor(){}
+
+    get quests (){
+        return this.#quests;
+    }
+
+    get completedQuests (){
+        const completed = [];
+        for (quest of this.#quests){
+            if (quest.completionDate !== null){
+                completed.push(quest);
+            }
+        }
+        return completed;
+    }
     
     addQuest(newQuest){
         this.#quests.push(newQuest);
@@ -101,15 +137,14 @@ class QuestGroup {
     completeQuest(index){
         const quest = this.#quests[index];
         quest.trackCompletionDate();
-        this.#completedQuests.push(quest);
-        this.removeQuest(index);
     }
     
     cleanCompleted(){
-        for (let i = 0; i < this.#completedQuests; i++){
-            const quest = this.#completedQuests[i];
+        for (let i = 0; i < this.completedQuests.length; i++){
+            const quest = this.completedQuests[i];
             if (quest.beenCompleted()){
-                this.#completedQuests.splice(i);
+                const quesInd = this.#quests.indexOf(quest);
+                this.removeQuest(quesInd);
                 i--;
             }
         }
