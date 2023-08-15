@@ -6,19 +6,13 @@ import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyT
 const body = query('body');
 
 function stylizeDateFormat(date){
-    format(date, 'MM.dd.yy, HH:mm')
+    return format(date, 'MM.dd.yy, hh:mm aa');
 }
 
 function getDateNow(){
     const d = new Date();
     return stylizeDateFormat(d);
 }
-
-const clock = make('div', body);
-setInterval(() => {
-    clock.textContent = getDateNow(); 
-}, 1000);
-
 
 class User {
     staticQuests = new StaticQuestGroup();
@@ -29,13 +23,24 @@ class User {
 
 }
 
-
 const user = new User();
-user.staticQuests.makeQuest("Poopy boy", [], new Date());
-user.dailyQuests.makeQuest("Fart man", [], DailyTime(16, 3));
-user.weeklyQuests.makeQuest("Dinodisaster", [], WeeklyTime(Day.Mon, 22, 0));
 
-user.dailyQuests.resetQuests();
-console.log(user);
 
+const display = (function(body){
+    const main = make('main', body);
+        const topBar = make('div.top-bar', main);
+            const titleHolder = make('div.title-holder', topBar);
+                const title = make('h1.title', titleHolder);
+                title.textContent = "Quest Log";
+            const date = make('div.date', topBar);
+
+        const dataHolder = make('div.data-holder', main);
+            const questSection = make('section.quests', dataHolder);
+            const taskSection = make('section.tasks', dataHolder);
+
+        const lowBar = make('div.low-bar', main);
+            const nav = make('nav', lowBar);
+                const pickStatic = make('button.static-quests', nav);
+
+})(body);
 

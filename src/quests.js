@@ -44,9 +44,6 @@ class Quest {
         return this.#completionDate;
     }
 
-    resetCompletionDate(){
-        this.#completionDate = null;
-    }
 
     #tasks = [];
 
@@ -71,6 +68,18 @@ class Quest {
         this.dueDate = dueDate;
     }
 
+    resetCompletionDate(){
+        this.#completionDate = null;
+    }
+
+    resetTasks(){
+        for (let i = 0; i < this.#tasks.length; i++){
+            if (task.completionDate !== null){
+                this.decompleteTask(i);
+            }
+        }
+    }
+
     removeTask(index){
         this.#tasks.splice(index, 1);
     } 
@@ -82,6 +91,11 @@ class Quest {
     completeTask(index){
         const task = this.#tasks[index];
         task.trackCompletionDate();
+    }
+    
+    decompleteTask(index){
+        const task = this.#tasks[index];
+        this.#completionDate = null;
     }
     
     shouldBeComplete(){
@@ -156,7 +170,7 @@ function DailyTime(hour, minute){
     return {
         hour, 
         minute
-    }
+    };
 }
 
 const Day = {
@@ -174,7 +188,7 @@ function WeeklyTime(day, hour, minute){
         day, 
         hour,
         minute
-    }
+    };
 }
 
 class StaticQuestGroup extends QuestGroup {
@@ -198,11 +212,14 @@ class DailyQuestGroup extends QuestGroup {
             const currQuest = this.getQuest(i);
             const dueTime = currQuest.dueDate;
             const newTime = new Date();
-            newTime.setHours(dueTime.getHours(), dueTime.getMinutes());
+            newTime.setHours(dueTime.getHours(), dueTime.getMinutes(), 0);
 
             currQuest.dueDate = newTime;
 
-            if (currQuest.completionDate !== null) currQuest.resetCompletionDate();
+            if (currQuest.completionDate !== null) {
+                currQuest.resetCompletionDate();
+                currQuest.resetTasks();
+            }
         }
     }
 }
@@ -220,6 +237,28 @@ class WeeklyQuestGroup extends QuestGroup {
         
         const qst = new Quest(name, tasks, date);
         this.addQuest(qst);
+    }
+
+    resetQuests(){
+        for (let i = 0; i < this.quests.length; i++){
+            const currQuest = this.getQuest(i);
+            const dueDate = currQuest.dueDate;
+
+            const newDate = new Date();
+            const dayDiff = newDate.getDay() - dueDate.getDay();
+            const newDayOfMonth = newDate.getDate() - dayDiff;
+            newDate.setDate(newDayOfMonth);
+            newDate.setHours(dueDate.getHours(), dueDate.getMinutes(), 0);
+
+            currQuest.dueDate = newDate;
+
+
+            if (currQuest.completionDate !== null) {
+                currQuest.resetCompletionDate();
+                currQuest.resetTasks();
+            }
+            
+        }
     }
 }
 
