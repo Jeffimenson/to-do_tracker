@@ -57,6 +57,7 @@ main {
     border-top: var(--pip-green) 2px solid;
     border-right: var(--pip-green) 2px solid;
     border-left: var(--pip-green) 2px solid;
+    border-image: linear-gradient(to bottom, var(--pip-green), var(--background-color)) 1;
 
     flex: 8;
 }
@@ -80,6 +81,7 @@ main {
 .date {
     border-top: var(--pip-green) 2px solid;
     border-right: var(--pip-green) 2px solid;
+    border-image: linear-gradient(to bottom, var(--pip-green), var(--background-color)) 1;
     
     flex: 1;
     display: flex;
@@ -93,6 +95,9 @@ main {
     border-bottom: var(--pip-green) 2px solid;
     border-right: var(--pip-green) 2px solid;
     border-left: var(--pip-green) 2px solid;
+
+    border-image: linear-gradient(to top, var(--pip-green), var(--background-color)) 1;
+    
 
     padding: 10px;
     height: 45px;
@@ -121,3 +126,25 @@ nav button:hover {
 }
 
 /* Data holder */
+.content {
+    flex: 1;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+}
+
+
+
+section.left ul.quests {
+    list-style: none;
+}
+
+section.left ul.quests li {
+    padding: 10px 45px;
+    border: solid 2px transparent;
+}
+
+section.left ul.quests li:hover {
+    border-color: var(--pip-green);
+}

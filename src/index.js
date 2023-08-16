@@ -35,9 +35,14 @@ const display = (function(body){
             const date = make('div.date', topBar);
             date.textContent = "DATE HERE";
 
-        const dataHolder = make('div.data-holder', main);
-            const questSection = make('section.quests', dataHolder);
-            const taskSection = make('section.tasks', dataHolder);
+        const content = make('div.content', main);
+            const leftSection = make('section.left', content);
+                const questList = make('ul.quests', leftSection);
+                for (let i = 0; i < 10; i++) { 
+                    const entry = make('li', questList); 
+                    entry.textContent = `Entry ${i}`;
+                }
+            const rightSection = make('section.right', content);
 
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);
