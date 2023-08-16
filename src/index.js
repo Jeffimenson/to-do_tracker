@@ -33,6 +33,7 @@ const display = (function(body){
                 const title = make('h1.title', titleHolder);
                 title.textContent = "Quest Log";
             const date = make('div.date', topBar);
+            date.textContent = "DATE HERE";
 
         const dataHolder = make('div.data-holder', main);
             const questSection = make('section.quests', dataHolder);
@@ -41,6 +42,14 @@ const display = (function(body){
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);
                 const pickStatic = make('button.static-quests', nav);
+                pickStatic.textContent = "Static";
 
+                const pickDaily = make('button.daily-quests', nav);
+                pickDaily.textContent = "Daily";
+
+                const pickWeekly = make('button.weekly-quests', nav);
+                pickWeekly.textContent = "Weekly";
+
+    
 })(body);
 
