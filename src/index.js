@@ -40,7 +40,8 @@ const display = (function(body){
                 const questList = make('ul.quests', leftSection);
                 for (let i = 0; i < 10; i++) { 
                     const entry = make('li', questList); 
-                    entry.textContent = `Entry ${i}`;
+                        const entryButton = make('button', entry);
+                        entryButton.textContent = `Quest ${i}`;
                 }
             const rightSection = make('section.right', content);
 

@@ -125,26 +125,41 @@ nav button:hover {
     border-color: var(--pip-green);
 }
 
-/* Data holder */
+/* Content */
 .content {
-    flex: 1;
+    flex: 1; 
 
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: grid; /*Nested scrollers didn't like display grid*/
+    grid-template-columns: 5fr 6fr;
+    gap: 5%;
+
+    overflow-y: hidden;
 
 }
 
-
+section.left {
+    overflow-y: auto;
+}
 
 section.left ul.quests {
     list-style: none;
+    height: 100%;
+
+
 }
 
 section.left ul.quests li {
-    padding: 10px 45px;
     border: solid 2px transparent;
+
 }
 
 section.left ul.quests li:hover {
     border-color: var(--pip-green);
+}
+
+section.left ul.quests li button {
+    width: 100%;
+    padding: 10px 45px;
+    box-sizing: border-box;
+    text-align: left;
 }
