@@ -44,6 +44,23 @@ const display = (function(body){
                         entryButton.textContent = `Quest ${i}`;
                 }
             const rightSection = make('section.right', content);
+                const taskAdder = make('button.task-adder', rightSection);
+                taskAdder.textContent = "+ Add task";
+                
+                const tasksContainer = make('div.tasks-container', rightSection);
+                    const taskList = make('ul.tasks', tasksContainer);
+                    for (let i = 0; i < 10; i++) { 
+                        const entry = make('li', taskList); 
+                        const entryLabel = make('label', entry);
+                        entryLabel.textContent = `Perform activity ${i}`;
+                        const entryInput = make('input', entryLabel);
+                        entryInput.type = 'checkbox';
+                        const customCheck = make('span.checkbox', entryLabel);
+
+
+                    }
+
+
 
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);

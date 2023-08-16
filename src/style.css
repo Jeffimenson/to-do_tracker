@@ -17,7 +17,7 @@ body, html {
     margin: 0;
 }
 
-button, input {
+button, input, label {
     box-sizing:content-box;
     border: none;
     background-color: inherit;
@@ -26,9 +26,10 @@ button, input {
     color: inherit;
 
     cursor: pointer;
+    display: block;
 }
 
-button:active, input:active {
+button:active, input:active, label:active{
     cursor: default;
 }
 
@@ -162,4 +163,50 @@ section.left ul.quests li button {
     padding: 10px 45px;
     box-sizing: border-box;
     text-align: left;
+}
+
+section.right {
+    display: grid;
+    grid-template-rows: 1fr 5fr;
+}
+
+section.right .task-adder {
+    text-align: right;
+}
+
+section.right ul.tasks {
+    list-style: none;
+}
+
+section.right ul.tasks li label{
+    padding: 10px 45px;
+    position: relative;
+}
+
+section.right ul.tasks li {
+    border: solid 2px transparent;
+}
+
+section.right ul.tasks li:hover {
+    border-color: var(--pip-green);
+}
+
+ul.tasks li label input[type='checkbox'] {
+    appearance: none;
+}
+
+ul.tasks li label input ~ .checkbox {
+    content: "";
+    position: absolute;
+    width: 12px;
+    height: 12px;
+
+    top: 35%;
+    left: 15px;
+
+    border: 2px solid var(--pip-green);
+}
+
+ul.tasks li label input:checked ~ .checkbox {
+    background-color: var(--pip-green);
 }
