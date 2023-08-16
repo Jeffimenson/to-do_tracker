@@ -60,7 +60,7 @@ main {
     border-left: var(--pip-green) 2px solid;
     border-image: linear-gradient(to bottom, var(--pip-green), var(--background-color)) 1;
 
-    flex: 8;
+    flex: 5;
 }
 .title {
     background-color: var(--background-color);
@@ -132,30 +132,42 @@ nav button:hover {
 
     display: grid; /*Nested scrollers didn't like display grid*/
     grid-template-columns: 5fr 6fr;
-    gap: 5%;
+    gap: 10%;
 
     overflow-y: hidden;
 
 }
 
+.content button {
+    border: 2px solid transparent;
+}
+
+.content button:hover {
+    border-color: var(--pip-green);
+}
+
 section.left {
+    overflow-y: hidden;
+
+    display: flex; /*Needs display flex or grid to have nested scrollers to work properly*/
+    flex-direction: column;
+}
+
+section.left .quest-container {
+    direction: rtl;
+
+    padding-left: 5%;
+
     overflow-y: auto;
 }
 
 section.left ul.quests {
     list-style: none;
     height: 100%;
-
-
 }
 
 section.left ul.quests li {
-    border: solid 2px transparent;
-
-}
-
-section.left ul.quests li:hover {
-    border-color: var(--pip-green);
+    position: relative;
 }
 
 section.left ul.quests li button {
@@ -165,13 +177,49 @@ section.left ul.quests li button {
     text-align: left;
 }
 
+section.left ul.quests li button.selected::before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+
+    top: 35%;
+    left: 20px;
+
+    border: 2px solid var(--pip-green);
+    background-color: var(--pip-green);
+
+}
+
+.quest-adder {
+    position: absolute; /*Couldn't position this relative to section left because overflow-x visible wouldn't work with overflow-y hidden*/
+    top: 70px;
+    right: 53%;
+    width: 1.2em;
+    height: 1.2em;
+
+    background-color: var(--pip-green);
+    color: var(--background-color);
+    font-weight: bold;
+
+}
+
 section.right {
     display: grid;
-    grid-template-rows: 1fr 5fr;
+    grid-template-rows: 20% 1fr;
+
+    overflow-y: hidden;
 }
 
 section.right .task-adder {
-    text-align: right;
+    justify-self: right;
+    align-self: center;
+    padding: 0.2rem 1rem;
+}
+
+section.right .tasks-container {
+    overflow-y: auto;
+    padding-right: 5%;
 }
 
 section.right ul.tasks {
@@ -196,13 +244,12 @@ ul.tasks li label input[type='checkbox'] {
 }
 
 ul.tasks li label input ~ .checkbox {
-    content: "";
     position: absolute;
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
 
     top: 35%;
-    left: 15px;
+    left: 20px;
 
     border: 2px solid var(--pip-green);
 }

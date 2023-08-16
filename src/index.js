@@ -37,12 +37,17 @@ const display = (function(body){
 
         const content = make('div.content', main);
             const leftSection = make('section.left', content);
-                const questList = make('ul.quests', leftSection);
-                for (let i = 0; i < 10; i++) { 
-                    const entry = make('li', questList); 
-                        const entryButton = make('button', entry);
-                        entryButton.textContent = `Quest ${i}`;
-                }
+                const questContainer = make('div.quest-container', leftSection);
+                    const questList = make('ul.quests', questContainer);
+                    for (let i = 0; i < 10; i++) { 
+                        const entry = make('li', questList); 
+                            const entryButton = make('button', entry);
+                            entryButton.textContent = `Quest ${i}`;
+                            entryButton.addEventListener('click', questSelect);
+                    }
+                const questAdder = make('button.quest-adder', leftSection);
+                questAdder.textContent = "+";
+
             const rightSection = make('section.right', content);
                 const taskAdder = make('button.task-adder', rightSection);
                 taskAdder.textContent = "+ Add task";
@@ -56,7 +61,6 @@ const display = (function(body){
                         const entryInput = make('input', entryLabel);
                         entryInput.type = 'checkbox';
                         const customCheck = make('span.checkbox', entryLabel);
-
 
                     }
 
@@ -73,6 +77,10 @@ const display = (function(body){
                 const pickWeekly = make('button.weekly-quests', nav);
                 pickWeekly.textContent = "Weekly";
 
-    
+    function questSelect(){
+        const lastSelected = query(".selected", questList);
+        if (lastSelected) lastSelected.classList.remove("selected");
+        this.classList.add("selected");
+    }
 })(body);
 
