@@ -46,17 +46,17 @@ function make(selector, parent){
     return newElement;
     
 }
-    function getNextSeparator(start, selector){
-        const nextHash = selector.indexOf('#', start);
-        const nextDot = selector.indexOf('.', start);
+function getNextSeparator(start, selector){
+    const nextHash = selector.indexOf('#', start);
+    const nextDot = selector.indexOf('.', start);
 
-        if (nextHash === -1){
-            return nextDot;
-        } else if (nextDot === -1){
-            return nextHash;
-        }
-        return (nextHash > nextDot) ? nextDot : nextHash;
+    if (nextHash === -1){
+        return nextDot;
+    } else if (nextDot === -1){
+        return nextHash;
     }
+    return (nextHash > nextDot) ? nextDot : nextHash;
+}
 
 // Object stuff
 const Factory = {

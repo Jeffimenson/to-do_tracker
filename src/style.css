@@ -155,10 +155,12 @@ section.left {
 
 section.left .quest-container {
     direction: rtl;
-
     padding-left: 5%;
 
     overflow-y: auto;
+}
+.quest-container * {
+    direction: ltr;
 }
 
 section.left ul.quests {
