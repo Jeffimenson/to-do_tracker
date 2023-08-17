@@ -85,7 +85,7 @@ class Quest {
     } 
 
     addTask(task){
-        this.#tasks.unshift(task);
+        this.#tasks.push(task);
     }
 
     completeTask(index){

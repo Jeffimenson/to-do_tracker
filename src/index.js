@@ -31,20 +31,21 @@ const user = new User();
 function randomInt(max, min=0) {return Math.floor(Math.random() * (max-min) + min);}
 const randomVerbs = ["poop", "fart", "piss", "sleep", "eat", "drink", "kill", "punch", "kick", "stalk"];
 const randomNouns = ["lamp", "turtle", "phone", "television", "radio", "table", "bed", "girl", "boy", "water", "poo poo", "pee pee"];
-const testTasks = [new Task("Eat", false), new Task("Sleep", false), new Task("Game", false)];
 for (let i = 0; i < randomInt(20, 5); i++){
     const tasks = [];
     for (let j = 0; j < randomInt(20, 5); j++){
         const task = new Task(`${randomVerbs[randomInt(randomVerbs.length)]} ${randomNouns[randomInt(randomNouns.length)]}`, false);
         tasks.push(task);
     }
-    user.staticQuests.makeQuest(`Quests ${i}`, tasks, testTasks);
+    user.staticQuests.makeQuest(`Quests ${i}`, tasks);
 }
 // ...
 
 
 const display = (function(body, user){
     let selectedQuestGroup = user.staticQuests; 
+    let selectedQuestIndex;
+
 
     // Dom generation code
     const main = make('main', body);
@@ -59,30 +60,17 @@ const display = (function(body, user){
             const leftSection = make('section.left', content);
                 const questContainer = make('div.quest-container', leftSection);
                     const questList = make('ul.quests', questContainer);
-                    // for (let i = 0; i < 10; i++) { 
-                    //     const entry = make('li', questList); 
-                    //         const entryButton = make('button', entry);
-                    //         entryButton.textContent = `Quest ${i}`;
-                    //         entryButton.addEventListener('click', questSelect);
-                    // }
                 const questAdder = make('button.quest-adder', leftSection);
                 questAdder.textContent = "+";
+                questAdder.addEventListener('click', onAddQuest);
 
             const rightSection = make('section.right', content);
                 const taskAdder = make('button.task-adder', rightSection);
                 taskAdder.textContent = "+ Add task";
+                taskAdder.addEventListener('click', onAddTask);
                 
                 const tasksContainer = make('div.tasks-container', rightSection);
                     const taskList = make('ul.tasks', tasksContainer);
-                    // for (let i = 0; i < 10; i++) { 
-                    //     const entry = make('li', taskList); 
-                    //     const entryLabel = make('label', entry);
-                    //     entryLabel.textContent = `Perform activity ${i}`;
-                    //     const entryInput = make('input', entryLabel);
-                    //     entryInput.type = 'checkbox';
-                    //     const customCheck = make('span.checkbox', entryLabel);
-
-                    // }
 
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);
@@ -92,17 +80,37 @@ const display = (function(body, user){
 
                 const pickDaily = make('button.daily-quests', nav);
                 pickDaily.textContent = "Daily";
-                pickDaily.addEventListener('click', onQuestGroupSelect.bind(null, user.staticQuests));
+                pickDaily.addEventListener('click', onQuestGroupSelect.bind(null, user.dailyQuests));
 
                 const pickWeekly = make('button.weekly-quests', nav);
                 pickWeekly.textContent = "Weekly";
-                pickWeekly.addEventListener('click', onQuestGroupSelect.bind(null, user.staticQuests));
+                pickWeekly.addEventListener('click', onQuestGroupSelect.bind(null, user.weeklyQuests));
     // ...
+
+    loadSelectedQuestGroup();
+
+    function clearDisplayedTasks(){
+        taskList.textContent = "";
+    }
 
     function onQuestGroupSelect(questGroup){
         selectedQuestGroup = questGroup;
         
-        const quests = questGroup.quests;
+        loadSelectedQuestGroup();
+        
+        clearDisplayedTasks();
+
+        const firstQuest = selectedQuestGroup.quests[0];
+        if (firstQuest){
+            const associatedEntry = query("[data-index='0']", questList);
+            reassignSelectionStyle(associatedEntry);
+            selectedQuestIndex = 0; 
+            loadSelectedQuest();
+        }
+    }
+
+    function loadSelectedQuestGroup(){
+        const quests = selectedQuestGroup.quests;
         questList.textContent = "";
         for (let i = 0; i < quests.length; i++){
             const entry = make('li', questList); 
@@ -114,13 +122,24 @@ const display = (function(body, user){
     }
 
     function questSelect(){
-        const lastSelected = query(".selected", questList);
-        if (lastSelected) lastSelected.classList.remove("selected");
-        this.classList.add("selected");
+        reassignSelectionStyle(this);
 
         const index = this.dataset.index;
-        const quest = selectedQuestGroup.quests[index];
+        selectedQuestIndex = index; 
 
+        loadSelectedQuest();
+    }
+
+    function reassignSelectionStyle(newSelected){
+        const lastSelected = query(".selected", questList);
+        if (lastSelected) lastSelected.classList.remove("selected");
+        newSelected.classList.add("selected");
+
+    }
+
+
+    function loadSelectedQuest(){
+        const quest = selectedQuestGroup.quests[selectedQuestIndex];
         taskList.textContent = "";
         for (let i = 0; i < quest.tasks.length; i++){
             const entry = make('li', taskList); 
@@ -132,6 +151,17 @@ const display = (function(body, user){
             entryInput.type = 'checkbox';
             const customCheck = make('span.checkbox', entryLabel);
         }
+    }
+
+    function onAddQuest(){
+        selectedQuestGroup.makeQuest("Added quest", []);
+        loadSelectedQuestGroup();
+    }
+    
+    function onAddTask(){
+        const task = new Task("Cool new thing to do", false);
+        selectedQuest.addTask(task);
+        loadSelectedQuest();
     }
 
 })(body, user);
