@@ -131,7 +131,7 @@ class QuestGroup {
     }
     
     addQuest(newQuest){
-        this.#quests.push(newQuest);
+        this.#quests.unshift(newQuest);
     }
 
     removeQuest(index){

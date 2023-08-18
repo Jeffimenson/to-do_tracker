@@ -1,6 +1,6 @@
 import { format, isToday, isThisWeek } from 'date-fns';
 import './style.css';
-import {make, query} from './jeffQuery.js';
+import {make, query, toggleClass} from './jeffQuery.js';
 import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime} from './quests.js';
 
 const body = query('body');
@@ -28,6 +28,7 @@ class User {
 const user = new User();
 
 //test code
+
 function randomInt(max, min=0) {return Math.floor(Math.random() * (max-min) + min);}
 const randomVerbs = ["poop", "fart", "piss", "sleep", "eat", "drink", "kill", "punch", "kick", "stalk"];
 const randomNouns = ["lamp", "turtle", "phone", "television", "radio", "table", "bed", "girl", "boy", "water", "poo poo", "pee pee"];
@@ -39,6 +40,7 @@ for (let i = 0; i < randomInt(20, 5); i++){
     }
     user.staticQuests.makeQuest(`Quests ${i}`, tasks);
 }
+
 // ...
 
 
@@ -59,7 +61,28 @@ const display = (function(body, user){
         const content = make('div.content', main);
             const leftSection = make('section.left', content);
                 const questContainer = make('div.quest-container', leftSection);
+                    const questPrompt = make('div.quest-prompt', questContainer);
+                        const questPromptTop = make('div.quest-prompt-top', questPrompt);
+                        const questPromptBody = make('div.quest-prompt-body', questPrompt);
+                            const questNameLabel = make("label", questPromptBody);
+
+                            const questNameInput = make('input#get-quest-name', questPromptBody);
+                            questNameInput.setAttribute("type", "text");
+                            questNameInput.setAttribute("placeholder", "Name here");
+
+                            questNameLabel.setAttribute("for", "get-quest-name");
+                            questNameLabel.textContent = "Quest name: "
+                            
+                            const submitQuest = make('button#submit-quest', questPromptBody);
+                            submitQuest.textContent = "Ok";
+                            
+
+
+                        const questPromptLow = make('div.quest-prompt-low', questPrompt);
+
                     const questList = make('ul.quests', questContainer);
+
+
                 const questAdder = make('button.quest-adder', leftSection);
                 questAdder.textContent = "+";
                 questAdder.addEventListener('click', onAddQuest);
@@ -119,6 +142,7 @@ const display = (function(body, user){
                 entryButton.dataset.index = i;
                 entryButton.addEventListener('click', questSelect);
         }
+
     }
 
     function questSelect(){
@@ -149,18 +173,30 @@ const display = (function(body, user){
             entryLabel.textContent = task.description;
             const entryInput = make('input', entryLabel);
             entryInput.type = 'checkbox';
+            // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
+            // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
         }
+
     }
 
     function onAddQuest(){
-        selectedQuestGroup.makeQuest("Added quest", []);
-        loadSelectedQuestGroup();
+        toggleClass(this, "selected");
+        toggleClass(questPrompt, "activated");
+
+        // selectedQuestGroup.makeQuest("Added quest", []);
+        // loadSelectedQuestGroup();
+
+        // selectedQuestIndex = 0;
+        // const associatedEntry = query(`[data-index='0']`, questList);
+        // reassignSelectionStyle(associatedEntry);
+        // loadSelectedQuest();
     }
+
     
     function onAddTask(){
         const task = new Task("Cool new thing to do", false);
-        selectedQuest.addTask(task);
+        selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
         loadSelectedQuest();
     }
 

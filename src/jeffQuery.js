@@ -58,6 +58,14 @@ function getNextSeparator(start, selector){
     return (nextHash > nextDot) ? nextDot : nextHash;
 }
 
+function toggleClass(element, cls){
+    if (element.classList.contains(cls)){
+        element.classList.remove(cls);
+    } else {
+        element.classList.add(cls);
+    }
+}
+
 // Object stuff
 const Factory = {
     produce(proto, publicObj={}){
@@ -68,4 +76,4 @@ const Factory = {
 
 
 // export statement
-export {make, query, Factory}; 
+export {make, query, Factory, toggleClass}; 
