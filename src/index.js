@@ -72,7 +72,7 @@ const display = (function(body, user){
 
                             const questNameInput = make('input#get-quest-name', questNameLabel);
                             questNameInput.setAttribute("type", "text");
-                            questNameInput.setAttribute("placeholder", "---");
+                            questNameInput.setAttribute("placeholder", "Name here");
                             
 
                             const questDueLabel = make("label", questPromptBody);
@@ -225,22 +225,43 @@ const display = (function(body, user){
         // const task = new Task("Cool new thing to do", false);
         // selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
         // loadSelectedQuest();
-        const wrapperForm = make("form#task-adder-form");
-        taskList.prepend(wrapperForm);
-        const newTaskInput = make("input#create-new-task", wrapperForm);
-        newTaskInput.setAttribute("placeholder", "New task");
-        newTaskInput.setAttribute("type", "text");
-        newTaskInput.addEventListener("focusout", ()=>{
-            wrapperForm.remove();
-        });
 
-        const submit = make("button", wrapperForm);
-        submit.textContent = "submit";
+        if (selectedQuestIndex !== undefined){
+            const wrapperForm = make("form#task-adder-form", taskList);
+            wrapperForm.setAttribute("onsubmit", "return false");
 
-        newTaskInput.focus();
+            // taskList.prepend(wrapperForm);
+            const newTaskInput = make("input#create-new-task", wrapperForm);
+            newTaskInput.setAttribute("placeholder", "New task");
+            newTaskInput.setAttribute("type", "text");
+            newTaskInput.addEventListener("focusout", ()=>{
+                wrapperForm.remove();
+            });
 
 
+            const submit = make("button", wrapperForm);
+            submit.textContent = "submit";
+            submit.addEventListener("pointerdown", ()=>{
+                const task = new Task(newTaskInput.value, false);
+                selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
+                newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
+                loadSelectedQuest();
+            });
+
+            newTaskInput.addEventListener("keydown", (e) => {
+                if (e.keyCode === 13){
+                    const task = new Task(newTaskInput.value, false);
+                    selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
+                    newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
+                    loadSelectedQuest();
+                }
+            });
+
+            newTaskInput.focus();
+
+        }
     }
+
 
 })(body, user);
 

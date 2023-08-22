@@ -1,5 +1,6 @@
 :root {
     --pip-green: #31b270;
+    --pip-darkened: #134929;
     --background-color: #01160a;
 }
 
@@ -39,6 +40,15 @@ button:active, input:active, label:active{
   border-style: solid;
   outline: none;
 } 
+
+input::placeholder {
+    color: var(--pip-darkened);
+    color-scheme: var(--pip-darkened);
+}
+
+/* .hidden {
+    display: none;
+} */
 
 /* Actual styling */
 main {
