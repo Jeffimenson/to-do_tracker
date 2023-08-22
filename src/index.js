@@ -20,7 +20,6 @@ class User {
     weeklyQuests = new WeeklyQuestGroup();
     
     constructor() {}
-
 }
 
 
@@ -63,20 +62,33 @@ const display = (function(body, user){
                 const questContainer = make('div.quest-container', leftSection);
                     const questPrompt = make('div.quest-prompt', questContainer);
                         const questPromptTop = make('div.quest-prompt-top', questPrompt);
-                        const questPromptBody = make('div.quest-prompt-body', questPrompt);
+                        const questPromptBody = make('form.quest-prompt-body', questPrompt);
+                        questPromptBody.setAttribute("action", "#");
+                        questPromptBody.setAttribute("method", "post");
+
                             const questNameLabel = make("label", questPromptBody);
-
-                            const questNameInput = make('input#get-quest-name', questPromptBody);
-                            questNameInput.setAttribute("type", "text");
-                            questNameInput.setAttribute("placeholder", "Name here");
-
                             questNameLabel.setAttribute("for", "get-quest-name");
-                            questNameLabel.textContent = "Quest name: "
+                            questNameLabel.textContent = "Quest name: ";
+
+                            const questNameInput = make('input#get-quest-name', questNameLabel);
+                            questNameInput.setAttribute("type", "text");
+                            questNameInput.setAttribute("placeholder", "---");
+                            
+
+                            const questDueLabel = make("label", questPromptBody);
+                            questDueLabel.setAttribute("for", "get-quest-due");
+                            questDueLabel.textContent = "Due date: ";
+
+                            const questDueInput = make('input#get-quest-due', questDueLabel); ;
+                            questDueInput.setAttribute("type", "date");
+
+
                             
                             const submitQuest = make('button#submit-quest', questPromptBody);
+                            submitQuest.setAttribute("type", "reset");
+                            submitQuest.addEventListener("click", onQuestSubmission);
                             submitQuest.textContent = "Ok";
                             
-
 
                         const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
@@ -98,14 +110,17 @@ const display = (function(body, user){
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);
                 const pickStatic = make('button.static-quests', nav);
+                pickStatic.setAttribute("type", "button");
                 pickStatic.textContent = "Static";
                 pickStatic.addEventListener('click', onQuestGroupSelect.bind(null, user.staticQuests));
 
                 const pickDaily = make('button.daily-quests', nav);
+                pickDaily.setAttribute("type", "button");
                 pickDaily.textContent = "Daily";
                 pickDaily.addEventListener('click', onQuestGroupSelect.bind(null, user.dailyQuests));
 
                 const pickWeekly = make('button.weekly-quests', nav);
+                pickWeekly.setAttribute("type", "button");
                 pickWeekly.textContent = "Weekly";
                 pickWeekly.addEventListener('click', onQuestGroupSelect.bind(null, user.weeklyQuests));
     // ...
@@ -138,6 +153,7 @@ const display = (function(body, user){
         for (let i = 0; i < quests.length; i++){
             const entry = make('li', questList); 
                 const entryButton = make('button', entry);
+                entryButton.setAttribute("type", "button");
                 entryButton.textContent = quests[i].name; 
                 entryButton.dataset.index = i;
                 entryButton.addEventListener('click', questSelect);
@@ -162,7 +178,7 @@ const display = (function(body, user){
     }
 
 
-    function loadSelectedQuest(){
+    function loadSelectedQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
         taskList.textContent = "";
         for (let i = 0; i < quest.tasks.length; i++){
@@ -177,7 +193,18 @@ const display = (function(body, user){
             // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
         }
+    }
 
+    function onQuestSubmission(){
+        toggleClass(questAdder, "selected");
+        toggleClass(questPrompt, "activated");
+
+        const questName = questNameInput.value;
+        const questDue = (questDueInput.value === "") ? new Date(questDueInput.value) : null;
+
+        console.log({questName, questDue});
+        selectedQuestGroup.makeQuest(questName, [], questDue);
+        onQuestGroupSelect(selectedQuestGroup);
     }
 
     function onAddQuest(){
@@ -195,9 +222,24 @@ const display = (function(body, user){
 
     
     function onAddTask(){
-        const task = new Task("Cool new thing to do", false);
-        selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
-        loadSelectedQuest();
+        // const task = new Task("Cool new thing to do", false);
+        // selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
+        // loadSelectedQuest();
+        const wrapperForm = make("form#task-adder-form");
+        taskList.prepend(wrapperForm);
+        const newTaskInput = make("input#create-new-task", wrapperForm);
+        newTaskInput.setAttribute("placeholder", "New task");
+        newTaskInput.setAttribute("type", "text");
+        newTaskInput.addEventListener("focusout", ()=>{
+            wrapperForm.remove();
+        });
+
+        const submit = make("button", wrapperForm);
+        submit.textContent = "submit";
+
+        newTaskInput.focus();
+
+
     }
 
 })(body, user);
