@@ -139,9 +139,10 @@ nav button {
     border: 2px solid transparent;
 }
 
-nav button:hover {
+nav button:hover, nav button.selected {
     border-color: var(--pip-green);
 }
+
 
 /* Content */
 .content {

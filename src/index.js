@@ -31,9 +31,9 @@ const user = new User();
 function randomInt(max, min=0) {return Math.floor(Math.random() * (max-min) + min);}
 const randomVerbs = ["poop", "fart", "piss", "sleep", "eat", "drink", "kill", "punch", "kick", "stalk"];
 const randomNouns = ["lamp", "turtle", "phone", "television", "radio", "table", "bed", "girl", "boy", "water", "poo poo", "pee pee"];
-for (let i = 0; i < randomInt(20, 5); i++){
+for (let i = 0; i < randomInt(5, 2); i++){
     const tasks = [];
-    for (let j = 0; j < randomInt(20, 5); j++){
+    for (let j = 0; j < randomInt(5, 2); j++){
         const task = new Task(`${randomVerbs[randomInt(randomVerbs.length)]} ${randomNouns[randomInt(randomNouns.length)]}`, false);
         tasks.push(task);
     }
@@ -112,32 +112,39 @@ const display = (function(body, user){
                 const pickStatic = make('button.static-quests', nav);
                 pickStatic.setAttribute("type", "button");
                 pickStatic.textContent = "Static";
-                pickStatic.addEventListener('click', onQuestGroupSelect.bind(null, user.staticQuests));
+                pickStatic.addEventListener('click', onQuestGroupSelect.bind(pickStatic, user.staticQuests));
 
                 const pickDaily = make('button.daily-quests', nav);
                 pickDaily.setAttribute("type", "button");
                 pickDaily.textContent = "Daily";
-                pickDaily.addEventListener('click', onQuestGroupSelect.bind(null, user.dailyQuests));
+                pickDaily.addEventListener('click', onQuestGroupSelect.bind(pickDaily, user.dailyQuests));
 
                 const pickWeekly = make('button.weekly-quests', nav);
                 pickWeekly.setAttribute("type", "button");
                 pickWeekly.textContent = "Weekly";
-                pickWeekly.addEventListener('click', onQuestGroupSelect.bind(null, user.weeklyQuests));
+                pickWeekly.addEventListener('click', onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
     // ...
 
-    loadSelectedQuestGroup();
+    onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); //Displays default quest group properly on start 
 
     function clearDisplayedTasks(){
         taskList.textContent = "";
     }
 
     function onQuestGroupSelect(questGroup){
+        if (questGroup !== selectedQuestGroup){
+            query(".selected", nav).classList.remove("selected")
+        }
         selectedQuestGroup = questGroup;
-        
+        this.classList.add("selected");
         loadSelectedQuestGroup();
         
         clearDisplayedTasks();
 
+        loadFirstQuest();
+    }
+
+    function loadFirstQuest(){
         const firstQuest = selectedQuestGroup.quests[0];
         if (firstQuest){
             const associatedEntry = query("[data-index='0']", questList);
@@ -204,7 +211,8 @@ const display = (function(body, user){
 
         console.log({questName, questDue});
         selectedQuestGroup.makeQuest(questName, [], questDue);
-        onQuestGroupSelect(selectedQuestGroup);
+        loadSelectedQuestGroup();
+        loadFirstQuest();
     }
 
     function onAddQuest(){
@@ -230,7 +238,6 @@ const display = (function(body, user){
             const wrapperForm = make("form#task-adder-form", taskList);
             wrapperForm.setAttribute("onsubmit", "return false");
 
-            // taskList.prepend(wrapperForm);
             const newTaskInput = make("input#create-new-task", wrapperForm);
             newTaskInput.setAttribute("placeholder", "New task");
             newTaskInput.setAttribute("type", "text");
@@ -241,19 +248,17 @@ const display = (function(body, user){
 
             const submit = make("button", wrapperForm);
             submit.textContent = "submit";
-            submit.addEventListener("pointerdown", ()=>{
+            const submitTaskFunc = ()=>{
                 const task = new Task(newTaskInput.value, false);
                 selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
                 newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
                 loadSelectedQuest();
-            });
+            };
+            submit.addEventListener("pointerdown", submitTaskFunc);
 
             newTaskInput.addEventListener("keydown", (e) => {
                 if (e.keyCode === 13){
-                    const task = new Task(newTaskInput.value, false);
-                    selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
-                    newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
-                    loadSelectedQuest();
+                    submitTaskFunc();
                 }
             });
 
