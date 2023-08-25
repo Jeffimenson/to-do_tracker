@@ -133,6 +133,10 @@ const display = (function(body, user){
         compTaskList.textContent = "";
     }
 
+    function clearDisplayedQuests(){
+        questList.textContent = "";
+    }
+
     function onQuestGroupSelect(questGroup){
         if (questGroup !== selectedQuestGroup){
             query(".selected", nav).classList.remove("selected")
@@ -160,6 +164,7 @@ const display = (function(body, user){
 
     function loadSelectedQuestGroup() {
         const quests = selectedQuestGroup.quests;
+        clearDisplayedQuests();
         clearDisplayedTasks(); 
         for (let i = 0; i < quests.length; i++){
             const entry = make('li', questList); 
