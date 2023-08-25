@@ -1,6 +1,7 @@
 :root {
     --pip-green: #31b270;
     --pip-darkened: #134929;
+    --pip-more-darker: #0d3521;
     --background-color: #01160a;
 }
 
@@ -139,8 +140,13 @@ nav button {
     border: 2px solid transparent;
 }
 
-nav button:hover, nav button.selected {
+nav button:hover {
     border-color: var(--pip-green);
+}
+
+nav button.selected {
+    border-color: var(--pip-green);
+    background-color: var(--pip-more-darker);
 }
 
 
@@ -323,6 +329,10 @@ section.right ul.tasks {
     list-style: none;
 }
 
+section.right ul.completed.tasks {
+    color: var(--pip-darkened);
+}
+
 section.right ul.tasks li label{
     padding: 10px 45px;
     position: relative;
@@ -351,8 +361,18 @@ ul.tasks li label input ~ .checkbox {
     border: 2px solid var(--pip-green);
 }
 
+ul.completed.tasks li label input ~ .checkbox {
+    border: 2px solid var(--pip-darkened);
+
+}
+
 ul.tasks li label input:checked ~ .checkbox {
     background-color: var(--pip-green);
+}
+
+
+ul.completed.tasks li label input:checked ~ .checkbox {
+    background-color: var(--pip-darkened);
 }
 
 input#create-new-task {

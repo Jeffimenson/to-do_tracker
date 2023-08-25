@@ -26,8 +26,16 @@ class Task {
         return this.#completionDate;
     }
 
-    trackCompletionDate(){
+    get isComplete () {
+        return this.#completionDate !== null;
+    }
+
+    complete(){
         this.#completionDate = new Date();
+    }
+
+    resetCompletion(){
+        this.#completionDate = null;
     }
 
     beenCompleted(){

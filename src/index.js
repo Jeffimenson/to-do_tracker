@@ -106,6 +106,7 @@ const display = (function(body, user){
                 
                 const tasksContainer = make('div.tasks-container', rightSection);
                     const taskList = make('ul.tasks', tasksContainer);
+                    const compTaskList = make('ul.completed.tasks', tasksContainer);
 
         const lowBar = make('div.low-bar', main);
             const nav = make('nav', lowBar);
@@ -129,6 +130,7 @@ const display = (function(body, user){
 
     function clearDisplayedTasks(){
         taskList.textContent = "";
+        compTaskList.textContent = "";
     }
 
     function onQuestGroupSelect(questGroup){
@@ -141,22 +143,24 @@ const display = (function(body, user){
         
         clearDisplayedTasks();
 
-        loadFirstQuest();
-    }
-
-    function loadFirstQuest(){
         const firstQuest = selectedQuestGroup.quests[0];
-        if (firstQuest){
-            const associatedEntry = query("[data-index='0']", questList);
-            reassignSelectionStyle(associatedEntry);
-            selectedQuestIndex = 0; 
-            loadSelectedQuest();
+        if (firstQuest) {
+            loadFirstQuest();
+        } else {
+            selectedQuestIndex = null;
         }
     }
 
-    function loadSelectedQuestGroup(){
+    function loadFirstQuest() {
+        const associatedEntry = query("[data-index='0']", questList);
+        reassignSelectionStyle(associatedEntry);
+        selectedQuestIndex = 0; 
+        loadSelectedQuest();
+    }
+
+    function loadSelectedQuestGroup() {
         const quests = selectedQuestGroup.quests;
-        questList.textContent = "";
+        clearDisplayedTasks(); 
         for (let i = 0; i < quests.length; i++){
             const entry = make('li', questList); 
                 const entryButton = make('button', entry);
@@ -168,7 +172,7 @@ const display = (function(body, user){
 
     }
 
-    function questSelect(){
+    function questSelect() {
         reassignSelectionStyle(this);
 
         const index = this.dataset.index;
@@ -187,20 +191,65 @@ const display = (function(body, user){
 
     function loadSelectedQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
-        taskList.textContent = "";
+        clearDisplayedTasks();
         for (let i = 0; i < quest.tasks.length; i++){
-            const entry = make('li', taskList); 
+            const entry = make('li'); 
+            entry.dataset.index = i;
             const entryLabel = make('label', entry);
 
             const task = quest.tasks[i];
             entryLabel.textContent = task.description;
             const entryInput = make('input', entryLabel);
             entryInput.type = 'checkbox';
+
+            if (task.isComplete) {
+                compTaskList.append(entry);
+                entryInput.checked = true;
+            } else {
+                taskList.append(entry);
+            }
+
+            entryInput.addEventListener("change", () => {
+                const checked = entryInput.checked;
+
+                let nextList;
+                if (checked) {
+                    task.complete();
+                    nextList = compTaskList;
+                } else {
+                    task.resetCompletion();
+                    nextList = taskList;
+                }
+
+                setTimeout(
+                    () => {
+                        const completedEntries = nextList.children;
+                        if (completedEntries.length > 0){
+                            for (let i = 0; i < completedEntries.length; i++){
+                                const currentIndex = completedEntries[i].dataset.index;
+                                const thisIndex = entry.dataset.index;
+
+                                if (currentIndex > thisIndex) {
+                                    nextList.insertBefore(entry, completedEntries[i]);
+                                    return;
+                                }
+                            }
+                            nextList.append(entry);
+                        } else {
+                            nextList.append(entry);
+                        }
+                    }, 
+                    200
+                );
+
+            });
+
             // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
             // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
         }
     }
+
 
     function onQuestSubmission(){
         toggleClass(questAdder, "selected");
@@ -234,14 +283,14 @@ const display = (function(body, user){
         // selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
         // loadSelectedQuest();
 
-        if (selectedQuestIndex !== undefined){
+        if (selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
             const wrapperForm = make("form#task-adder-form", taskList);
             wrapperForm.setAttribute("onsubmit", "return false");
 
             const newTaskInput = make("input#create-new-task", wrapperForm);
             newTaskInput.setAttribute("placeholder", "New task");
             newTaskInput.setAttribute("type", "text");
-            newTaskInput.addEventListener("focusout", ()=>{
+            newTaskInput.addEventListener("focusout", () => {
                 wrapperForm.remove();
             });
 
