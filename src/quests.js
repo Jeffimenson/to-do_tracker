@@ -70,13 +70,21 @@ class Quest {
         return completed;
     }
 
+    get isComplete () {
+        return this.#completionDate !== null;
+    }
+
     constructor (name, tasks=[], dueDate=null){
         this.name = name; 
         this.#tasks = tasks;
         this.dueDate = dueDate;
     }
 
-    resetCompletionDate(){
+    complete(){
+        this.#completionDate = new Date(); 
+    }
+
+    resetCompletion(){
         this.#completionDate = null;
     }
 

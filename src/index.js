@@ -94,7 +94,7 @@ const display = (function(body, user) {
                         const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
                     const questList = make('ul.quests', questContainer);
-                    const compQuestList = make('ul.quests', questContainer);
+                    const compQuestList = make('ul.completed.quests', questContainer);
 
 
                 const questAdder = make('button.quest-adder', leftSection);
@@ -106,11 +106,11 @@ const display = (function(body, user) {
             const rightSection = make('section.right', content);
                 const actionsContainer = make('div.actions-container', rightSection);
                     const taskAdder = make('button.task-adder', actionsContainer);
-                    taskAdder.textContent = "+ Add task";
+                    taskAdder.textContent = "Add task +";
                     taskAdder.addEventListener('click', onAddTask);
                     
                     const questEnder = make('button.quest-ender', actionsContainer);
-                    questEnder.textContent = "End quest";
+                    questEnder.textContent = "End quest ×";
                     questEnder.addEventListener('click', onEndQuest);
 
                 const tasksContainer = make('div.tasks-container', rightSection);
@@ -144,11 +144,12 @@ const display = (function(body, user) {
 
     function clearDisplayedQuests() {
         questList.textContent = "";
+        compQuestList.textContent = "";
     }
 
     function onQuestGroupSelect(questGroup) {
-        if (questGroup !== selectedQuestGroup){
-            query(".selected", nav).classList.remove("selected")
+        if (questGroup !== selectedQuestGroup) {
+            query(".selected", nav).classList.remove("selected");
         }
         selectedQuestGroup = questGroup;
         this.classList.add("selected");
@@ -176,12 +177,18 @@ const display = (function(body, user) {
         clearDisplayedQuests();
         clearDisplayedTasks(); 
         for (let i = 0; i < quests.length; i++){
-            const entry = make('li', questList); 
+            const entry = make('li'); 
                 const entryButton = make('button', entry);
                 entryButton.setAttribute("type", "button");
                 entryButton.textContent = quests[i].name; 
                 entryButton.dataset.index = i;
                 entryButton.addEventListener('click', questSelect);
+
+            if (quests[i].isComplete){
+                compQuestList.append(entry);
+            } else {
+                questList.append(entry);
+            }
         }
 
     }
@@ -196,7 +203,7 @@ const display = (function(body, user) {
     }
 
     function reassignSelectionStyle(newSelected) {
-        const lastSelected = query(".selected", questList);
+        const lastSelected = query(".selected", questContainer);
         if (lastSelected) lastSelected.classList.remove("selected");
         newSelected.classList.add("selected");
 
@@ -234,6 +241,21 @@ const display = (function(body, user) {
                 } else {
                     task.resetCompletion();
                     nextList = taskList;
+
+                    if (quest.isComplete){
+                        const uncompleted = questList.children;
+                        quest.resetCompletion();
+                        const associatedLiEntry = query(`[data-index='${selectedQuestIndex}]`, compQuestList);
+                        console.log({associatedLiEntry, selectedQuestIndex});
+                        for (let i = 0; i < uncompleted.length; i++){
+                            const currentIndex = query('button', uncompleted[i]).dataset.index;
+                            const thisIndex = selectedQuestIndex;
+
+                            if (currentIndex > thisIndex) {
+                                // questList.insertBefore(associatedLiEntry, uncompleted[i]);
+                            }
+                        }
+                    }
                 }
 
                 setTimeout(
@@ -268,7 +290,9 @@ const display = (function(body, user) {
             const customCheck = make('span.checkbox', entryLabel);
         }
 
-        ConditionallyToggleTaskEnder();
+        if (!quest.isComplete){
+            ConditionallyToggleTaskEnder();
+        }
     }
 
     function ConditionallyToggleTaskEnder(){
@@ -300,7 +324,11 @@ const display = (function(body, user) {
     }
 
     function onEndQuest(){
-        console.log("QUEST ENDS");
+        const quest = selectedQuestGroup.quests[selectedQuestIndex];
+        quest.complete();
+        loadSelectedQuestGroup();
+
+        toggleClass(this, 'activated');
     }
 
     

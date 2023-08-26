@@ -1,6 +1,6 @@
 :root {
     --pip-green: #31b270;
-    --pip-darkened: #134929;
+    --pip-darkened: #175a32;
     --pip-more-darker: #0d3521;
     --background-color: #01160a;
 }
@@ -36,7 +36,7 @@ button:active, input:active, label:active{
 }
 
 :where(textarea),
-:where(input[type="text"],input[type="search"],input[type="password"],input[type="url"]){
+:where(input[type="text"], input[type="search"], input[type="password"], input[type="url"]){
   appearance: none;
   border-style: solid;
   outline: none;
@@ -261,6 +261,7 @@ section.left ul.quests {
     list-style: none;
 }
 
+
 section.left ul.quests li {
     position: relative;
 }
@@ -270,6 +271,10 @@ section.left ul.quests li button {
     padding: 10px 45px;
     box-sizing: border-box;
     text-align: left;
+}
+
+section.left ul.completed.quests li button {
+    color: var(--pip-darkened);
 }
 
 section.left ul.quests li button.selected::before {
@@ -284,6 +289,11 @@ section.left ul.quests li button.selected::before {
     border: 2px solid var(--pip-green);
     background-color: var(--pip-green);
 
+}
+
+section.left ul.completed.quests li button.selected::before {
+    border-color: var(--pip-darkened);
+    background-color: var(--pip-darkened);
 }
 
 .quest-adder {
