@@ -5,8 +5,12 @@ import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyT
 
 const body = query('body');
 
-function stylizeDateFormat(date){
+function formatFullDate(date){
     return format(date, 'MM.dd.yy, hh:mm aa');
+}
+
+function formateDate(date){
+    return format(date, 'MM.dd.yy');
 }
 
 function getDateNow(){
@@ -135,7 +139,7 @@ const display = (function(body, user) {
                 pickWeekly.addEventListener('click', onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
     // ...
 
-    onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); //Displays default quest group properly on start 
+    onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
 
     function clearDisplayedTasks() {
         taskList.textContent = "";
@@ -145,6 +149,13 @@ const display = (function(body, user) {
     function clearDisplayedQuests() {
         questList.textContent = "";
         compQuestList.textContent = "";
+    }
+
+    function loadFirstQuest() {
+        const associatedEntry = query("[data-index='0']", questList);
+        reassignSelectionStyle(associatedEntry);
+        selectedQuestIndex = 0; 
+        loadSelectedQuest();
     }
 
     function onQuestGroupSelect(questGroup) {
@@ -165,13 +176,6 @@ const display = (function(body, user) {
         }
     }
 
-    function loadFirstQuest() {
-        const associatedEntry = query("[data-index='0']", questList);
-        reassignSelectionStyle(associatedEntry);
-        selectedQuestIndex = 0; 
-        loadSelectedQuest();
-    }
-
     function loadSelectedQuestGroup() {
         const quests = selectedQuestGroup.quests;
         clearDisplayedQuests();
@@ -179,10 +183,16 @@ const display = (function(body, user) {
         for (let i = 0; i < quests.length; i++){
             const entry = make('li'); 
             entry.dataset.index = i;
-                const entryButton = make('button', entry);
+                const entryButton = make('button.quest-select', entry);
                 entryButton.setAttribute("type", "button");
                 entryButton.textContent = quests[i].name; 
-                entryButton.addEventListener('click', questSelect);
+                entryButton.addEventListener('click', onQuestSelect);
+
+                if (quests[i].dueDate != null){
+                    const dueDisplay = make('button.due', entryButton);
+                    dueDisplay.textContent = `[ ${formateDate(quests[i].dueDate)} ]`;
+
+                }
 
             if (quests[i].isComplete){
                 compQuestList.append(entry);
@@ -190,10 +200,9 @@ const display = (function(body, user) {
                 questList.append(entry);
             }
         }
-
     }
 
-    function questSelect() {
+    function onQuestSelect() {
         reassignSelectionStyle(this);
 
         selectedQuestIndex = this.parentNode.dataset.index;
@@ -205,7 +214,6 @@ const display = (function(body, user) {
         const lastSelected = query(".selected", questContainer);
         if (lastSelected) lastSelected.classList.remove("selected");
         newSelected.classList.add("selected");
-
     }
 
 
@@ -261,6 +269,7 @@ const display = (function(body, user) {
                     }
                 }
 
+
                 setTimeout(
                     () => {
                         const completedEntries = nextList.children;
@@ -287,7 +296,6 @@ const display = (function(body, user) {
 
             });
 
-
             // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
             // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
@@ -296,11 +304,13 @@ const display = (function(body, user) {
         if (!quest.isComplete){
             ConditionallyToggleTaskEnder();
         }
+
     }
 
     function ConditionallyToggleTaskEnder(){
         const taskAmount = taskList.children.length;
-        if (taskAmount === 0){
+        const compAmm = compTaskList.children.length;
+        if (taskAmount === 0 && compAmm > 0){
             questEnder.classList.add("activated");
         } else {
             questEnder.classList.remove("activated"); //doesn't matter if .activated isn't actually apart of element
@@ -313,7 +323,8 @@ const display = (function(body, user) {
         toggleClass(questPrompt, "activated");
 
         const questName = questNameInput.value;
-        const questDue = (questDueInput.value === "") ? new Date(questDueInput.value) : null;
+        const questDue = (Date.parse(questDueInput.value)) ? new Date(questDueInput.value) : null;
+        console.log(questDueInput.value);
 
         console.log({questName, questDue});
         selectedQuestGroup.makeQuest(questName, [], questDue);
@@ -321,7 +332,7 @@ const display = (function(body, user) {
         loadFirstQuest();
     }
 
-    function onAddQuest(){
+    function onAddQuest() {
         toggleClass(this, "selected");
         toggleClass(questPrompt, "activated");
     }
@@ -346,7 +357,6 @@ const display = (function(body, user) {
             newTaskInput.addEventListener("focusout", () => {
                 wrapperForm.remove();
             });
-
 
             const submit = make("button", wrapperForm);
             submit.textContent = "submit";

@@ -266,11 +266,14 @@ section.left ul.quests li {
     position: relative;
 }
 
-section.left ul.quests li button {
+section.left ul.quests li button.quest-select {
     width: 100%;
     padding: 10px 45px;
     box-sizing: border-box;
     text-align: left;
+
+    display: grid;
+    grid-template-columns: 6fr 1fr;
 }
 
 section.left ul.completed.quests li button {
@@ -295,6 +298,23 @@ section.left ul.completed.quests li button.selected::before {
     border-color: var(--pip-darkened);
     background-color: var(--pip-darkened);
 }
+
+ul.quests li button.due {
+    position: absolute;
+    right: 5%;
+    top: calc(0.8rem - 5px);
+
+    font-size: 0.8rem;
+
+    padding: 0 5px;
+}
+
+ul.quests li button.due:hover {
+    border-color: none;
+    background-color: var(--pip-green);
+    color: var(--background-color);
+}
+
 
 .quest-adder {
     position: absolute; /*Couldn't position this relative to section left because overflow-x visible wouldn't work with overflow-y hidden*/
