@@ -32,7 +32,7 @@ const randomInt = (max, min=0) => Math.floor(Math.random() * (max-min) + min);
 
 const randomVerbs = ["poop", "fart", "piss", "sleep", "eat", "drink", "kill", "punch", "kick", "stalk"];
 const randomNouns = ["lamp", "turtle", "phone", "television", "radio", "table", "bed", "girl", "boy", "water", "poo poo", "pee pee"];
-for (let i = 0; i < randomInt(5, 2); i++) {
+for (let i = 0; i < randomInt(5, 4); i++) {
     const tasks = [];
     for (let j = 0; j < randomInt(5, 2); j++) {
         const task = new Task(`${randomVerbs[randomInt(randomVerbs.length)]} ${randomNouns[randomInt(randomNouns.length)]}`, false);
@@ -178,10 +178,10 @@ const display = (function(body, user) {
         clearDisplayedTasks(); 
         for (let i = 0; i < quests.length; i++){
             const entry = make('li'); 
+            entry.dataset.index = i;
                 const entryButton = make('button', entry);
                 entryButton.setAttribute("type", "button");
                 entryButton.textContent = quests[i].name; 
-                entryButton.dataset.index = i;
                 entryButton.addEventListener('click', questSelect);
 
             if (quests[i].isComplete){
@@ -196,8 +196,7 @@ const display = (function(body, user) {
     function questSelect() {
         reassignSelectionStyle(this);
 
-        const index = this.dataset.index;
-        selectedQuestIndex = index; 
+        selectedQuestIndex = this.parentNode.dataset.index;
 
         loadSelectedQuest();
     }
@@ -245,15 +244,19 @@ const display = (function(body, user) {
                     if (quest.isComplete){
                         const uncompleted = questList.children;
                         quest.resetCompletion();
-                        const associatedLiEntry = query(`[data-index='${selectedQuestIndex}]`, compQuestList);
-                        console.log({associatedLiEntry, selectedQuestIndex});
-                        for (let i = 0; i < uncompleted.length; i++){
-                            const currentIndex = query('button', uncompleted[i]).dataset.index;
-                            const thisIndex = selectedQuestIndex;
+                        const associatedLiEntry = compQuestList.querySelector(`li[data-index="${selectedQuestIndex}"]`);
+                        let foundPlace = false; 
+                        loop: for (let i = 0; i < uncompleted.length; i++) {
+                            const currentIndex = uncompleted[i].dataset.index;
 
-                            if (currentIndex > thisIndex) {
-                                // questList.insertBefore(associatedLiEntry, uncompleted[i]);
+                            if (currentIndex > selectedQuestIndex) {
+                                questList.insertBefore(associatedLiEntry, uncompleted[i]);
+                                foundPlace = true;
+                                break loop;
                             }
+                        }
+                        if (!foundPlace){
+                            questList.append(associatedLiEntry);
                         }
                     }
                 }
