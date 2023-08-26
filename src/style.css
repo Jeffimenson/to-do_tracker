@@ -309,15 +309,37 @@ section.left ul.quests li button.selected::before {
 
 section.right {
     display: grid;
-    grid-template-rows: 20% 1fr;
+    grid-template-rows: min-content 1fr;
 
     overflow-y: hidden;
 }
 
-section.right .task-adder {
+section.right .actions-container {
+    margin: 5% 0;
     justify-self: right;
     align-self: center;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+section.right .task-adder {
     padding: 0.2rem 1rem;
+}
+
+section.right .quest-ender {
+    height: 0;
+    width: 0;
+    padding: 0;
+
+    overflow-y: hidden;
+}
+
+section.right .quest-ender.activated {
+    padding: 0.2rem 1rem;
+    width: auto;
+    height: auto;
 }
 
 section.right .tasks-container {

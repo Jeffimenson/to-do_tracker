@@ -28,12 +28,13 @@ const user = new User();
 
 //test code
 
-function randomInt(max, min=0) {return Math.floor(Math.random() * (max-min) + min);}
+const randomInt = (max, min=0) => Math.floor(Math.random() * (max-min) + min);
+
 const randomVerbs = ["poop", "fart", "piss", "sleep", "eat", "drink", "kill", "punch", "kick", "stalk"];
 const randomNouns = ["lamp", "turtle", "phone", "television", "radio", "table", "bed", "girl", "boy", "water", "poo poo", "pee pee"];
-for (let i = 0; i < randomInt(5, 2); i++){
+for (let i = 0; i < randomInt(5, 2); i++) {
     const tasks = [];
-    for (let j = 0; j < randomInt(5, 2); j++){
+    for (let j = 0; j < randomInt(5, 2); j++) {
         const task = new Task(`${randomVerbs[randomInt(randomVerbs.length)]} ${randomNouns[randomInt(randomNouns.length)]}`, false);
         tasks.push(task);
     }
@@ -43,7 +44,7 @@ for (let i = 0; i < randomInt(5, 2); i++){
 // ...
 
 
-const display = (function(body, user){
+const display = (function(body, user) {
     let selectedQuestGroup = user.staticQuests; 
     let selectedQuestIndex;
 
@@ -79,7 +80,7 @@ const display = (function(body, user){
                             questDueLabel.setAttribute("for", "get-quest-due");
                             questDueLabel.textContent = "Due date: ";
 
-                            const questDueInput = make('input#get-quest-due', questDueLabel); ;
+                            const questDueInput = make('input#get-quest-due', questDueLabel); 
                             questDueInput.setAttribute("type", "date");
 
 
@@ -93,17 +94,25 @@ const display = (function(body, user){
                         const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
                     const questList = make('ul.quests', questContainer);
+                    const compQuestList = make('ul.quests', questContainer);
 
 
                 const questAdder = make('button.quest-adder', leftSection);
                 questAdder.textContent = "+";
                 questAdder.addEventListener('click', onAddQuest);
 
+
+
             const rightSection = make('section.right', content);
-                const taskAdder = make('button.task-adder', rightSection);
-                taskAdder.textContent = "+ Add task";
-                taskAdder.addEventListener('click', onAddTask);
-                
+                const actionsContainer = make('div.actions-container', rightSection);
+                    const taskAdder = make('button.task-adder', actionsContainer);
+                    taskAdder.textContent = "+ Add task";
+                    taskAdder.addEventListener('click', onAddTask);
+                    
+                    const questEnder = make('button.quest-ender', actionsContainer);
+                    questEnder.textContent = "End quest";
+                    questEnder.addEventListener('click', onEndQuest);
+
                 const tasksContainer = make('div.tasks-container', rightSection);
                     const taskList = make('ul.tasks', tasksContainer);
                     const compTaskList = make('ul.completed.tasks', tasksContainer);
@@ -128,16 +137,16 @@ const display = (function(body, user){
 
     onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); //Displays default quest group properly on start 
 
-    function clearDisplayedTasks(){
+    function clearDisplayedTasks() {
         taskList.textContent = "";
         compTaskList.textContent = "";
     }
 
-    function clearDisplayedQuests(){
+    function clearDisplayedQuests() {
         questList.textContent = "";
     }
 
-    function onQuestGroupSelect(questGroup){
+    function onQuestGroupSelect(questGroup) {
         if (questGroup !== selectedQuestGroup){
             query(".selected", nav).classList.remove("selected")
         }
@@ -186,7 +195,7 @@ const display = (function(body, user){
         loadSelectedQuest();
     }
 
-    function reassignSelectionStyle(newSelected){
+    function reassignSelectionStyle(newSelected) {
         const lastSelected = query(".selected", questList);
         if (lastSelected) lastSelected.classList.remove("selected");
         newSelected.classList.add("selected");
@@ -214,6 +223,7 @@ const display = (function(body, user){
                 taskList.append(entry);
             }
 
+
             entryInput.addEventListener("change", () => {
                 const checked = entryInput.checked;
 
@@ -236,6 +246,7 @@ const display = (function(body, user){
 
                                 if (currentIndex > thisIndex) {
                                     nextList.insertBefore(entry, completedEntries[i]);
+                                    ConditionallyToggleTaskEnder();
                                     return;
                                 }
                             }
@@ -243,15 +254,29 @@ const display = (function(body, user){
                         } else {
                             nextList.append(entry);
                         }
+
+                        ConditionallyToggleTaskEnder();
                     }, 
                     200
                 );
 
             });
 
+
             // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
             // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
+        }
+
+        ConditionallyToggleTaskEnder();
+    }
+
+    function ConditionallyToggleTaskEnder(){
+        const taskAmount = taskList.children.length;
+        if (taskAmount === 0){
+            questEnder.classList.add("activated");
+        } else {
+            questEnder.classList.remove("activated"); //doesn't matter if .activated isn't actually apart of element
         }
     }
 
@@ -272,22 +297,14 @@ const display = (function(body, user){
     function onAddQuest(){
         toggleClass(this, "selected");
         toggleClass(questPrompt, "activated");
+    }
 
-        // selectedQuestGroup.makeQuest("Added quest", []);
-        // loadSelectedQuestGroup();
-
-        // selectedQuestIndex = 0;
-        // const associatedEntry = query(`[data-index='0']`, questList);
-        // reassignSelectionStyle(associatedEntry);
-        // loadSelectedQuest();
+    function onEndQuest(){
+        console.log("QUEST ENDS");
     }
 
     
     function onAddTask(){
-        // const task = new Task("Cool new thing to do", false);
-        // selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
-        // loadSelectedQuest();
-
         if (selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
             const wrapperForm = make("form#task-adder-form", taskList);
             wrapperForm.setAttribute("onsubmit", "return false");
@@ -302,7 +319,7 @@ const display = (function(body, user){
 
             const submit = make("button", wrapperForm);
             submit.textContent = "submit";
-            const submitTaskFunc = ()=>{
+            const submitTaskFunc = () => {
                 const task = new Task(newTaskInput.value, false);
                 selectedQuestGroup.quests[selectedQuestIndex].addTask(task);
                 newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
