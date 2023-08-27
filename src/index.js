@@ -48,7 +48,7 @@ for (let i = 0; i < randomInt(5, 4); i++) {
 // ...
 
 
-const display = (function(body, user) {
+const DisplayInteractionManager = (function(body, user) {
     let selectedQuestGroup = user.staticQuests; 
     let selectedQuestIndex;
 
@@ -167,7 +167,6 @@ const display = (function(body, user) {
         loadSelectedQuestGroup();
         
         clearDisplayedTasks();
-
         const firstQuest = selectedQuestGroup.quests[0];
         if (firstQuest) {
             loadFirstQuest();
@@ -189,10 +188,33 @@ const display = (function(body, user) {
                 entryButton.addEventListener('click', onQuestSelect);
 
                 if (quests[i].dueDate != null){
-                    const dueDisplay = make('button.due', entryButton);
+                    const dueDisplay = make('button.due', entry);
                     dueDisplay.textContent = `[ ${formateDate(quests[i].dueDate)} ]`;
-
                 }
+
+            const moreButton = make('button.more', entry);
+                const URI = "http://www.w3.org/2000/svg"
+                const moreIcon = document.createElementNS(URI, 'svg');
+                moreButton.append(moreIcon);
+                moreIcon.setAttribute("viewBox", "0 0 20 20");
+                    const iconInternals = document.createElementNS(URI, 'path');
+                    iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
+                    iconInternals.setAttribute("fill", "currentColor");
+                    moreIcon.append(iconInternals);
+                
+                const moreOptions = make('div.more-quest-options.hidden', moreButton);
+                    const deleteQuest = make('button.delete-quest', moreOptions);
+                    deleteQuest.textContent = 'Delete';
+
+                    deleteQuest.addEventListener('click', () => {
+                        selectedQuestGroup.removeQuest(i);
+                        selectedQuestIndex = null;
+                        loadSelectedQuestGroup();
+                    });
+
+            moreButton.addEventListener('click', () => {
+                toggleClass(moreOptions, 'hidden');
+            });
 
             if (quests[i].isComplete){
                 compQuestList.append(entry);
@@ -220,7 +242,7 @@ const display = (function(body, user) {
     function loadSelectedQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
         clearDisplayedTasks();
-        for (let i = 0; i < quest.tasks.length; i++){
+        for (let i = 0; i < quest.tasks.length; i++) {
             const entry = make('li'); 
             entry.dataset.index = i;
             const entryLabel = make('label', entry);
@@ -236,7 +258,6 @@ const display = (function(body, user) {
             } else {
                 taskList.append(entry);
             }
-
 
             entryInput.addEventListener("change", () => {
                 const checked = entryInput.checked;
@@ -263,7 +284,7 @@ const display = (function(body, user) {
                                 break loop;
                             }
                         }
-                        if (!foundPlace){
+                        if (!foundPlace) {
                             questList.append(associatedLiEntry);
                         }
                     }
@@ -301,13 +322,13 @@ const display = (function(body, user) {
             const customCheck = make('span.checkbox', entryLabel);
         }
 
-        if (!quest.isComplete){
+        if (!quest.isComplete) {
             ConditionallyToggleTaskEnder();
         }
 
     }
 
-    function ConditionallyToggleTaskEnder(){
+    function ConditionallyToggleTaskEnder() {
         const taskAmount = taskList.children.length;
         const compAmm = compTaskList.children.length;
         if (taskAmount === 0 && compAmm > 0){
@@ -318,7 +339,7 @@ const display = (function(body, user) {
     }
 
 
-    function onQuestSubmission(){
+    function onQuestSubmission() {
         toggleClass(questAdder, "selected");
         toggleClass(questPrompt, "activated");
 
@@ -337,7 +358,7 @@ const display = (function(body, user) {
         toggleClass(questPrompt, "activated");
     }
 
-    function onEndQuest(){
+    function onEndQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
         quest.complete();
         loadSelectedQuestGroup();
@@ -381,4 +402,3 @@ const display = (function(body, user) {
 
 
 })(body, user);
-

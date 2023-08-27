@@ -47,9 +47,9 @@ input::placeholder {
     color-scheme: var(--pip-darkened);
 }
 
-/* .hidden {
+.hidden {
     display: none;
-} */
+}
 
 /* Actual styling */
 main {
@@ -253,10 +253,9 @@ section.left .quest-container {
 #get-quest-due {
     display: inline;
 }
-
-
 /*...*/
 
+/* quests display */ 
 section.left ul.quests {
     list-style: none;
 }
@@ -264,6 +263,14 @@ section.left ul.quests {
 
 section.left ul.quests li {
     position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+
+    border: 2px solid transparent;
+}
+
+section.left ul.quests li:hover {
+    border-color: var(--pip-green);
 }
 
 section.left ul.quests li button.quest-select {
@@ -272,8 +279,11 @@ section.left ul.quests li button.quest-select {
     box-sizing: border-box;
     text-align: left;
 
-    display: grid;
-    grid-template-columns: 6fr 1fr;
+    border: 0;
+}
+
+section.left ul.quests li button.quest-select:hover {
+    border: 0;
 }
 
 section.left ul.completed.quests li button {
@@ -300,19 +310,56 @@ section.left ul.completed.quests li button.selected::before {
 }
 
 ul.quests li button.due {
-    position: absolute;
-    right: 5%;
-    top: calc(0.8rem - 5px);
-
     font-size: 0.8rem;
+    padding: 0;
 
-    padding: 0 5px;
+    align-self: center;
 }
 
 ul.quests li button.due:hover {
-    border-color: none;
     background-color: var(--pip-green);
     color: var(--background-color);
+}
+
+button.more {
+    width: 1em;
+    padding: 0 1em;
+    align-self: center;
+    justify-self: center;
+
+    position: relative;
+}
+
+div.more-quest-options {
+    position: absolute;
+    bottom: -1.4em;
+    left: -50px;
+
+    border: 2px solid  var(--pip-green);
+    background-color: var(--background-color);
+
+    z-index: 1; /* Prevents overlap with li elements */
+}
+
+div.more-quest-options > button {
+    padding: 2px 5px;
+    border: 1px solid transparent;
+}
+
+div.more-quest-options > button:hover {
+    border: 1px solid var(--pip-green);
+}
+
+ul.quests li button.more:hover {
+    border-color: transparent;
+}
+
+button.more svg {
+    color: var(--pip-darkened);
+}
+
+button.more:hover svg {
+    color: var(--pip-green);
 }
 
 
@@ -336,7 +383,9 @@ ul.quests li button.due:hover {
     border-color: var(--pip-green);
     background-color: #01160a;
 }
+/* ... */
 
+/* Right section things */ 
 section.right {
     display: grid;
     grid-template-rows: min-content 1fr;
