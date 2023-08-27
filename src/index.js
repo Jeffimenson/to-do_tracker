@@ -208,7 +208,7 @@ const DisplayInteractionManager = (function(body, user) {
 
                     deleteQuest.addEventListener('click', () => {
                         selectedQuestGroup.removeQuest(i);
-                        selectedQuestIndex = null;
+                        resetSelectedQuest();
                         loadSelectedQuestGroup();
                     });
 
@@ -222,6 +222,11 @@ const DisplayInteractionManager = (function(body, user) {
                 questList.append(entry);
             }
         }
+    }
+
+    function resetSelectedQuest(){
+        selectedQuestIndex = null;
+        questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
     }
 
     function onQuestSelect() {
