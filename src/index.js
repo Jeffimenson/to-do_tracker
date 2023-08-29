@@ -153,7 +153,7 @@ const DisplayInteractionManager = (function(body, user) {
 
     function loadFirstQuest() {
         const associatedEntry = query("[data-index='0']", questList);
-        reassignSelectionStyle(associatedEntry);
+        reassignSelectionStyle(query('.quest-select', associatedEntry));
         selectedQuestIndex = 0; 
         loadSelectedQuest();
     }
@@ -166,7 +166,6 @@ const DisplayInteractionManager = (function(body, user) {
         this.classList.add("selected");
         loadSelectedQuestGroup();
         
-        clearDisplayedTasks();
         const firstQuest = selectedQuestGroup.quests[0];
         if (firstQuest) {
             loadFirstQuest();
@@ -189,7 +188,7 @@ const DisplayInteractionManager = (function(body, user) {
 
                 if (quests[i].dueDate != null){
                     const dueDisplay = make('button.due', entry);
-                    dueDisplay.textContent = `[ ${formateDate(quests[i].dueDate)} ]`;
+                    dueDisplay.textContent = formateDate(quests[i].dueDate);
                 }
 
             const moreButton = make('button.more', entry);
@@ -210,6 +209,31 @@ const DisplayInteractionManager = (function(body, user) {
                         selectedQuestGroup.removeQuest(i);
                         resetSelectedQuest();
                         loadSelectedQuestGroup();
+                    });
+
+                    const editQuestName = make('button.edit-quest-name', moreOptions);
+                    editQuestName.textContent = 'Edit';
+
+                    editQuestName.addEventListener('click', () => {
+                        entry.classList.add('hidden');
+
+                        const editor = make('input.quest-editor');
+                        editor.setAttribute('type', 'text');
+                        editor.value = quests[i].name;
+                        entry.after(editor);
+
+                        editor.focus();
+
+                        const submitEdit = () => {
+                            quests[i].name = editor.value;
+                            entryButton.textContent = quests[i].name;
+                            entry.classList.remove('hidden');
+                            
+                            editor.remove();
+                        };
+                        editor.addEventListener('focusout', submitEdit);
+
+                        
                     });
 
             moreButton.addEventListener('click', () => {

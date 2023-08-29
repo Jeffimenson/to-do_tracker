@@ -269,6 +269,11 @@ section.left ul.quests li {
     border: 2px solid transparent;
 }
 
+section.left ul.quests li.hidden {
+    display: none;
+}
+
+
 section.left ul.quests li:hover {
     border-color: var(--pip-green);
 }
@@ -330,15 +335,22 @@ button.more {
     position: relative;
 }
 
-div.more-quest-options {
+.more-quest-options {
     position: absolute;
-    bottom: -1.4em;
+    bottom: -3em;
     left: -50px;
 
     border: 2px solid  var(--pip-green);
     background-color: var(--background-color);
 
     z-index: 1; /* Prevents overlap with li elements */
+
+    display: flex;
+    flex-direction: column;
+}
+
+.more-quest-options.hidden {
+    display: none;
 }
 
 div.more-quest-options > button {
@@ -360,6 +372,11 @@ button.more svg {
 
 button.more:hover svg {
     color: var(--pip-green);
+}
+
+.quest-editor {
+    padding: 10px 45px;
+    
 }
 
 
