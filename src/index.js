@@ -233,6 +233,12 @@ const DisplayInteractionManager = (function(body, user) {
                         };
                         editor.addEventListener('focusout', submitEdit);
 
+                        editor.addEventListener("keydown", (e) => {
+                            if (e.keyCode === 13){
+                                submitEdit();
+                            }
+                        });
+
                         
                     });
 
