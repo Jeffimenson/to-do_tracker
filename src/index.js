@@ -243,6 +243,8 @@ const DisplayInteractionManager = (function(body, user) {
                     });
 
             moreButton.addEventListener('click', () => {
+                const last = query('div.more-quest-options:not(.hidden)', questContainer);
+                if (last && last !== moreOptions) last.classList.add('hidden');
                 toggleClass(moreOptions, 'hidden');
             });
 
