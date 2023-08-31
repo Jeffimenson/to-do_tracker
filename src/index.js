@@ -192,17 +192,12 @@ const DisplayInteractionManager = (function(body, user) {
                 }
 
             const moreButton = make('button.more', entry);
-                const URI = "http://www.w3.org/2000/svg"
-                const moreIcon = document.createElementNS(URI, 'svg');
+                const moreIcon = createDropdownIcon();
                 moreButton.append(moreIcon);
-                moreIcon.setAttribute("viewBox", "0 0 20 20");
-                    const iconInternals = document.createElementNS(URI, 'path');
-                    iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
-                    iconInternals.setAttribute("fill", "currentColor");
-                    moreIcon.append(iconInternals);
+
                 
-                const moreOptions = make('div.more-quest-options.hidden', moreButton);
-                    const deleteQuest = make('button.delete-quest', moreOptions);
+                const moreOptions = make('div.more-options.hidden', moreButton);
+                    const deleteQuest = make('button.delete-option', moreOptions);
                     deleteQuest.textContent = 'Delete';
 
                     deleteQuest.addEventListener('click', () => {
@@ -211,13 +206,13 @@ const DisplayInteractionManager = (function(body, user) {
                         loadSelectedQuestGroup();
                     });
 
-                    const editQuestName = make('button.edit-quest-name', moreOptions);
+                    const editQuestName = make('button.edit-name-option', moreOptions);
                     editQuestName.textContent = 'Edit';
 
                     editQuestName.addEventListener('click', () => {
                         entry.classList.add('hidden');
 
-                        const editor = make('input.quest-editor');
+                        const editor = make('input.name-editor');
                         editor.setAttribute('type', 'text');
                         editor.value = quests[i].name;
                         entry.after(editor);
@@ -266,6 +261,18 @@ const DisplayInteractionManager = (function(body, user) {
         }
     }
 
+    function createDropdownIcon(){
+        const URI = "http://www.w3.org/2000/svg"
+        const moreIcon = document.createElementNS(URI, 'svg');
+        moreIcon.setAttribute("viewBox", "0 0 20 20");
+            const iconInternals = document.createElementNS(URI, 'path');
+            iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
+            iconInternals.setAttribute("fill", "currentColor");
+            moreIcon.append(iconInternals);
+
+        return moreIcon;
+    }
+
     function resetSelectedQuest(){
         selectedQuestIndex = null;
         questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
@@ -293,11 +300,70 @@ const DisplayInteractionManager = (function(body, user) {
             const entry = make('li'); 
             entry.dataset.index = i;
             const entryLabel = make('label', entry);
-
             const task = quest.tasks[i];
             entryLabel.textContent = task.description;
-            const entryInput = make('input', entryLabel);
-            entryInput.type = 'checkbox';
+                const entryInput = make('input', entryLabel);
+                entryInput.type = 'checkbox';
+
+            const moreButton = make('button.more', entry);
+                const moreIcon = createDropdownIcon();
+                moreButton.append(moreIcon);
+                
+                const moreOptions = make('div.more-options.hidden', moreButton);
+                    const deleteOption = make('button.delete-option', moreOptions);
+                    deleteOption.textContent = 'Delete';
+
+                    deleteOption.addEventListener('click', () => {
+                        // Delete task code here
+                        quest.removeTask(i);
+                        loadSelectedQuest();
+                    });
+
+                    const editName = make('button.edit-name-option', moreOptions);
+                    editName.textContent = 'Edit';
+
+                    editName.addEventListener('click', () => {
+                        entry.classList.add('hidden');
+
+                        const editor = make('input.name-editor');
+                        editor.setAttribute('type', 'text');
+                        editor.value = task.description;
+                        entry.after(editor);
+
+                        editor.focus();
+
+                        const submitEdit = () => {
+                            task.description = editor.value;
+                            entryLabel.nodeValue = task.description;
+                            entry.classList.remove('hidden');
+                            
+                            editor.remove();
+                        };
+                        editor.addEventListener('focusout', submitEdit);
+
+                        editor.addEventListener("keydown", (e) => {
+                            if (e.keyCode === 13){
+                                submitEdit();
+                            }
+                        });
+                    });
+
+            moreOptions.setAttribute('tabindex', 0);
+            moreButton.addEventListener('click', () => { 
+                const last = query('div.more-options:not(.hidden)', questContainer);
+                if (last && last !== moreOptions) {
+                    last.classList.add('hidden');
+                } 
+
+                toggleClass(moreOptions, 'hidden');
+                moreOptions.focus(); 
+            });
+            moreOptions.addEventListener('blur', (e) => {
+                if (!entry.querySelector(':hover')){
+                    moreOptions.classList.add('hidden');
+                }
+            })
+            
 
             if (task.isComplete) {
                 compTaskList.append(entry);

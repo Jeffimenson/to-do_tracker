@@ -335,7 +335,7 @@ button.more {
     position: relative;
 }
 
-.more-quest-options {
+.more-options {
     position: absolute;
     bottom: -3em;
     left: -50px;
@@ -349,20 +349,20 @@ button.more {
     flex-direction: column;
 }
 
-.more-quest-options.hidden {
+.more-options.hidden {
     display: none;
 }
 
-div.more-quest-options > button {
+div.more-options > button {
     padding: 2px 5px;
     border: 1px solid transparent;
 }
 
-div.more-quest-options > button:hover {
+div.more-options > button:hover {
     border: 1px solid var(--pip-green);
 }
 
-ul.quests li button.more:hover {
+li button.more:hover { /* button.more styling is reused for use in task lists */
     border-color: transparent;
 }
 
@@ -374,8 +374,9 @@ button.more:hover svg {
     color: var(--pip-green);
 }
 
-.quest-editor {
+.name-editor {
     padding: 10px 45px;
+    border: 2px solid transparent
     
 }
 
@@ -458,6 +459,13 @@ section.right ul.tasks li label{
 
 section.right ul.tasks li {
     border: solid 2px transparent;
+
+    display: grid;
+    grid-template-columns: 1fr auto;
+}
+
+section.right ul.tasks li.hidden {
+    display: none;
 }
 
 section.right ul.tasks li:hover {
