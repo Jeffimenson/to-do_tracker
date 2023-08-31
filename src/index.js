@@ -245,12 +245,17 @@ const DisplayInteractionManager = (function(body, user) {
             moreOptions.setAttribute('tabindex', 0);
             moreButton.addEventListener('click', () => { 
                 const last = query('div.more-quest-options:not(.hidden)', questContainer);
-                if (last && last !== moreOptions) last.classList.add('hidden');
+                if (last && last !== moreOptions) {
+                    last.classList.add('hidden');
+                } 
+
                 toggleClass(moreOptions, 'hidden');
-                moreOptions.focus(); //not doing anything :(
+                moreOptions.focus(); 
             });
-            moreOptions.addEventListener('blur', () => {
-                toggleClass(moreOptions, 'hidden');
+            moreOptions.addEventListener('blur', (e) => {
+                if (!entry.querySelector(':hover')){
+                    moreOptions.classList.add('hidden');
+                }
             })
             
             if (quests[i].isComplete){
