@@ -248,7 +248,7 @@ const DisplayInteractionManager = (function(body, user) {
                 moreOptions.focus(); 
             });
             moreOptions.addEventListener('blur', (e) => {
-                if (!entry.querySelector(':hover')){
+                if (!entry.querySelector('.more:hover')){
                     moreOptions.classList.add('hidden');
                 }
             })
@@ -301,7 +301,8 @@ const DisplayInteractionManager = (function(body, user) {
             entry.dataset.index = i;
             const entryLabel = make('label', entry);
             const task = quest.tasks[i];
-            entryLabel.textContent = task.description;
+            const labelText = make('span', entryLabel)
+            labelText.textContent = task.description;
                 const entryInput = make('input', entryLabel);
                 entryInput.type = 'checkbox';
 
@@ -334,11 +335,13 @@ const DisplayInteractionManager = (function(body, user) {
 
                         const submitEdit = () => {
                             task.description = editor.value;
-                            entryLabel.nodeValue = task.description;
+                            labelText.textContent = task.description;
+
                             entry.classList.remove('hidden');
                             
                             editor.remove();
                         };
+
                         editor.addEventListener('focusout', submitEdit);
 
                         editor.addEventListener("keydown", (e) => {
@@ -359,7 +362,7 @@ const DisplayInteractionManager = (function(body, user) {
                 moreOptions.focus(); 
             });
             moreOptions.addEventListener('blur', (e) => {
-                if (!entry.querySelector(':hover')){
+                if (!entry.querySelector('.more:hover')){
                     moreOptions.classList.add('hidden');
                 }
             })
