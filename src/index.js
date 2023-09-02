@@ -49,10 +49,6 @@ for (let i = 0; i < randomInt(5, 4); i++) {
 
 
 const DisplayInteractionManager = (function(body, user) {
-    let selectedQuestGroup = user.staticQuests; 
-    let selectedQuestIndex;
-
-
     // Dom generation code
     const main = make('main', body);
         const topBar = make('div.top-bar', main);
@@ -87,25 +83,19 @@ const DisplayInteractionManager = (function(body, user) {
                             const questDueInput = make('input#get-quest-due', questDueLabel); 
                             questDueInput.setAttribute("type", "date");
 
-
-                            
                             const submitQuest = make('button#submit-quest', questPromptBody);
                             submitQuest.setAttribute("type", "reset");
                             submitQuest.addEventListener("click", onQuestSubmission);
                             submitQuest.textContent = "Ok";
-                            
 
                         const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
                     const questList = make('ul.quests', questContainer);
                     const compQuestList = make('ul.completed.quests', questContainer);
 
-
                 const questAdder = make('button.quest-adder', leftSection);
                 questAdder.textContent = "+";
                 questAdder.addEventListener('click', onAddQuest);
-
-
 
             const rightSection = make('section.right', content);
                 const actionsContainer = make('div.actions-container', rightSection);
@@ -139,6 +129,8 @@ const DisplayInteractionManager = (function(body, user) {
                 pickWeekly.addEventListener('click', onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
     // ...
 
+    let selectedQuestGroup = user.staticQuests; 
+    let selectedQuestIndex;
     onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
 
     function clearDisplayedTasks() {
@@ -149,116 +141,6 @@ const DisplayInteractionManager = (function(body, user) {
     function clearDisplayedQuests() {
         questList.textContent = "";
         compQuestList.textContent = "";
-    }
-
-    function loadFirstQuest() {
-        const associatedEntry = query("[data-index='0']", questList);
-        reassignSelectionStyle(query('.quest-select', associatedEntry));
-        selectedQuestIndex = 0; 
-        loadSelectedQuest();
-    }
-
-    function onQuestGroupSelect(questGroup) {
-        if (questGroup !== selectedQuestGroup) {
-            query(".selected", nav).classList.remove("selected");
-        }
-        selectedQuestGroup = questGroup;
-        this.classList.add("selected");
-        loadSelectedQuestGroup();
-        
-        const firstQuest = selectedQuestGroup.quests[0];
-        if (firstQuest) {
-            loadFirstQuest();
-        } else {
-            selectedQuestIndex = null;
-        }
-    }
-
-    function loadSelectedQuestGroup() {
-        const quests = selectedQuestGroup.quests;
-        clearDisplayedQuests();
-        clearDisplayedTasks(); 
-        for (let i = 0; i < quests.length; i++){
-            const entry = make('li'); 
-            entry.dataset.index = i;
-                const entryButton = make('button.quest-select', entry);
-                entryButton.setAttribute("type", "button");
-                entryButton.textContent = quests[i].name; 
-                entryButton.addEventListener('click', onQuestSelect);
-
-                if (quests[i].dueDate != null){
-                    const dueDisplay = make('button.due', entry);
-                    dueDisplay.textContent = formateDate(quests[i].dueDate);
-                }
-
-            const moreButton = make('button.more', entry);
-                const moreIcon = createDropdownIcon();
-                moreButton.append(moreIcon);
-
-                
-                const moreOptions = make('div.more-options.hidden', moreButton);
-                    const deleteQuest = make('button.delete-option', moreOptions);
-                    deleteQuest.textContent = 'Delete';
-
-                    deleteQuest.addEventListener('click', () => {
-                        selectedQuestGroup.removeQuest(i);
-                        resetSelectedQuest();
-                        loadSelectedQuestGroup();
-                    });
-
-                    const editQuestName = make('button.edit-name-option', moreOptions);
-                    editQuestName.textContent = 'Edit';
-
-                    editQuestName.addEventListener('click', () => {
-                        entry.classList.add('hidden');
-
-                        const editor = make('input.name-editor');
-                        editor.setAttribute('type', 'text');
-                        editor.value = quests[i].name;
-                        entry.after(editor);
-
-                        editor.focus();
-
-                        const submitEdit = () => {
-                            quests[i].name = editor.value;
-                            entryButton.textContent = quests[i].name;
-                            entry.classList.remove('hidden');
-                            
-                            editor.remove();
-                        };
-                        editor.addEventListener('focusout', submitEdit);
-
-                        editor.addEventListener("keydown", (e) => {
-                            if (e.keyCode === 13){
-                                submitEdit();
-                            }
-                        });
-
-                        
-                    });
-
-            moreOptions.setAttribute('tabindex', 0);
-            moreButton.addEventListener('click', () => { 
-                const last = query('div.more-quest-options:not(.hidden)', questContainer);
-                if (last && last !== moreOptions) {
-                    last.classList.add('hidden');
-                } 
-
-                toggleClass(moreOptions, 'hidden');
-                moreOptions.focus(); 
-            });
-            moreOptions.addEventListener('blur', (e) => {
-                if (!entry.querySelector('.more:hover')){
-                    moreOptions.classList.add('hidden');
-                }
-            })
-            
-            if (quests[i].isComplete){
-                compQuestList.append(entry);
-            } else {
-                questList.append(entry);
-            }
-        }
     }
 
     function createDropdownIcon(){
@@ -278,173 +160,13 @@ const DisplayInteractionManager = (function(body, user) {
         questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
     }
 
-    function onQuestSelect() {
-        reassignSelectionStyle(this);
-
-        selectedQuestIndex = this.parentNode.dataset.index;
-
-        loadSelectedQuest();
-    }
-
     function reassignSelectionStyle(newSelected) {
         const lastSelected = query(".selected", questContainer);
         if (lastSelected) lastSelected.classList.remove("selected");
         newSelected.classList.add("selected");
     }
 
-
-    function loadSelectedQuest() {
-        const quest = selectedQuestGroup.quests[selectedQuestIndex];
-        clearDisplayedTasks();
-        for (let i = 0; i < quest.tasks.length; i++) {
-            const entry = make('li'); 
-            entry.dataset.index = i;
-            const entryLabel = make('label', entry);
-            const task = quest.tasks[i];
-            const labelText = make('span', entryLabel)
-            labelText.textContent = task.description;
-                const entryInput = make('input', entryLabel);
-                entryInput.type = 'checkbox';
-
-            const moreButton = make('button.more', entry);
-                const moreIcon = createDropdownIcon();
-                moreButton.append(moreIcon);
-                
-                const moreOptions = make('div.more-options.hidden', moreButton);
-                    const deleteOption = make('button.delete-option', moreOptions);
-                    deleteOption.textContent = 'Delete';
-
-                    deleteOption.addEventListener('click', () => {
-                        // Delete task code here
-                        quest.removeTask(i);
-                        loadSelectedQuest();
-                    });
-
-                    const editName = make('button.edit-name-option', moreOptions);
-                    editName.textContent = 'Edit';
-
-                    editName.addEventListener('click', () => {
-                        entry.classList.add('hidden');
-
-                        const editor = make('input.name-editor');
-                        editor.setAttribute('type', 'text');
-                        editor.value = task.description;
-                        entry.after(editor);
-
-                        editor.focus();
-
-                        const submitEdit = () => {
-                            task.description = editor.value;
-                            labelText.textContent = task.description;
-
-                            entry.classList.remove('hidden');
-                            
-                            editor.remove();
-                        };
-
-                        editor.addEventListener('focusout', submitEdit);
-
-                        editor.addEventListener("keydown", (e) => {
-                            if (e.keyCode === 13){
-                                submitEdit();
-                            }
-                        });
-                    });
-
-            moreOptions.setAttribute('tabindex', 0);
-            moreButton.addEventListener('click', () => { 
-                const last = query('div.more-options:not(.hidden)', questContainer);
-                if (last && last !== moreOptions) {
-                    last.classList.add('hidden');
-                } 
-
-                toggleClass(moreOptions, 'hidden');
-                moreOptions.focus(); 
-            });
-            moreOptions.addEventListener('blur', (e) => {
-                if (!entry.querySelector('.more:hover')){
-                    moreOptions.classList.add('hidden');
-                }
-            })
-            
-
-            if (task.isComplete) {
-                compTaskList.append(entry);
-                entryInput.checked = true;
-            } else {
-                taskList.append(entry);
-            }
-
-            entryInput.addEventListener("change", () => {
-                const checked = entryInput.checked;
-
-                let nextList;
-                if (checked) {
-                    task.complete();
-                    nextList = compTaskList;
-                } else {
-                    task.resetCompletion();
-                    nextList = taskList;
-
-                    if (quest.isComplete){
-                        const uncompleted = questList.children;
-                        quest.resetCompletion();
-                        const associatedLiEntry = compQuestList.querySelector(`li[data-index="${selectedQuestIndex}"]`);
-                        let foundPlace = false; 
-                        loop: for (let i = 0; i < uncompleted.length; i++) {
-                            const currentIndex = uncompleted[i].dataset.index;
-
-                            if (currentIndex > selectedQuestIndex) {
-                                questList.insertBefore(associatedLiEntry, uncompleted[i]);
-                                foundPlace = true;
-                                break loop;
-                            }
-                        }
-                        if (!foundPlace) {
-                            questList.append(associatedLiEntry);
-                        }
-                    }
-                }
-
-
-                setTimeout(
-                    () => {
-                        const completedEntries = nextList.children;
-                        if (completedEntries.length > 0){
-                            for (let i = 0; i < completedEntries.length; i++){
-                                const currentIndex = completedEntries[i].dataset.index;
-                                const thisIndex = entry.dataset.index;
-
-                                if (currentIndex > thisIndex) {
-                                    nextList.insertBefore(entry, completedEntries[i]);
-                                    ConditionallyToggleTaskEnder();
-                                    return;
-                                }
-                            }
-                            nextList.append(entry);
-                        } else {
-                            nextList.append(entry);
-                        }
-
-                        ConditionallyToggleTaskEnder();
-                    }, 
-                    200
-                );
-
-            });
-
-            // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
-            // entryInput.setAttribute("tabIndex", "-1");
-            const customCheck = make('span.checkbox', entryLabel);
-        }
-
-        if (!quest.isComplete) {
-            ConditionallyToggleTaskEnder();
-        }
-
-    }
-
-    function ConditionallyToggleTaskEnder() {
+    function conditionallyToggleTaskEnder() {
         const taskAmount = taskList.children.length;
         const compAmm = compTaskList.children.length;
         if (taskAmount === 0 && compAmm > 0){
@@ -455,35 +177,262 @@ const DisplayInteractionManager = (function(body, user) {
     }
 
 
-    function onQuestSubmission() {
-        toggleClass(questAdder, "selected");
-        toggleClass(questPrompt, "activated");
-
-        const questName = questNameInput.value;
-        const questDue = (Date.parse(questDueInput.value)) ? new Date(questDueInput.value) : null;
-        console.log(questDueInput.value);
-
-        console.log({questName, questDue});
-        selectedQuestGroup.makeQuest(questName, [], questDue);
-        loadSelectedQuestGroup();
-        loadFirstQuest();
+    // Section loaders and generators
+    function loadFirstQuest() {
+        const associatedEntry = query("[data-index='0']", questList);
+        reassignSelectionStyle(query('.quest-select', associatedEntry));
+        selectedQuestIndex = 0; 
+        loadSelectedQuest();
     }
 
-    function onAddQuest() {
-        toggleClass(this, "selected");
-        toggleClass(questPrompt, "activated");
+    function generateTaskEntry(quest, taskIndex) {
+        const task = quest.tasks[taskIndex];
+        const entry = make('li'); 
+        entry.dataset.index = taskIndex;
+        const entryLabel = make('label', entry);
+        const labelText = make('span', entryLabel)
+        labelText.textContent = task.description;
+            const entryInput = make('input', entryLabel);
+            entryInput.type = 'checkbox';
+
+        const moreButton = make('button.more', entry);
+            const moreIcon = createDropdownIcon();
+            moreButton.append(moreIcon);
+            
+            const moreOptions = make('div.more-options.hidden', moreButton);
+                const deleteOption = make('button.delete-option', moreOptions);
+                deleteOption.textContent = 'Delete';
+
+                deleteOption.addEventListener('click', () => {
+                    // Delete task code here
+                    quest.removeTask(taskIndex);
+                    loadSelectedQuest();
+                });
+
+                const editName = make('button.edit-name-option', moreOptions);
+                editName.textContent = 'Edit';
+
+                editName.addEventListener('click', () => {
+                    entry.classList.add('hidden');
+
+                    const editor = make('input.name-editor');
+                    editor.setAttribute('type', 'text');
+                    editor.value = task.description;
+                    entry.after(editor);
+
+                    editor.focus();
+
+                    const submitEdit = () => {
+                        task.description = editor.value;
+                        labelText.textContent = task.description;
+
+                        entry.classList.remove('hidden');
+                        
+                        editor.remove();
+                    };
+
+                    editor.addEventListener('focusout', submitEdit);
+
+                    editor.addEventListener("keydown", (e) => {
+                        if (e.keyCode === 13){
+                            submitEdit();
+                        }
+                    });
+                });
+
+        moreOptions.setAttribute('tabindex', 0);
+        moreButton.addEventListener('click', () => { 
+            const last = query('div.more-options:not(.hidden)', questContainer);
+            if (last && last !== moreOptions) {
+                last.classList.add('hidden');
+            } 
+
+            toggleClass(moreOptions, 'hidden');
+            moreOptions.focus(); 
+        });
+        moreOptions.addEventListener('blur', (e) => {
+            if (!entry.querySelector('.more:hover')){
+                moreOptions.classList.add('hidden');
+            }
+        })
+        
+        entryInput.addEventListener("change", () => {
+            const checked = entryInput.checked;
+
+            let nextList;
+            if (checked) {
+                task.complete();
+                nextList = compTaskList;
+            } else {
+                task.resetCompletion();
+                nextList = taskList;
+
+                if (quest.isComplete){
+                    const uncompleted = questList.children;
+                    quest.resetCompletion();
+                    const associatedLiEntry = compQuestList.querySelector(`li[data-index="${selectedQuestIndex}"]`);
+                    let foundPlace = false; 
+                    loop: for (let i = 0; i < uncompleted.length; i++) {
+                        const currentIndex = uncompleted[i].dataset.index;
+
+                        if (currentIndex > selectedQuestIndex) {
+                            questList.insertBefore(associatedLiEntry, uncompleted[i]);
+                            foundPlace = true;
+                            break loop;
+                        }
+                    }
+                    if (!foundPlace) {
+                        questList.append(associatedLiEntry);
+                    }
+                }
+            }
+
+            setTimeout(
+                () => {
+                    const completedEntries = nextList.children;
+                    if (completedEntries.length > 0){
+                        for (let i = 0; i < completedEntries.length; i++){
+                            const currentIndex = completedEntries[i].dataset.index;
+                            const thisIndex = entry.dataset.index;
+
+                            if (currentIndex > thisIndex) {
+                                nextList.insertBefore(entry, completedEntries[i]);
+                                conditionallyToggleTaskEnder();
+                                return;
+                            }
+                        }
+                        nextList.append(entry);
+                    } else {
+                        nextList.append(entry);
+                    }
+
+                    conditionallyToggleTaskEnder();
+                }, 
+                200
+            );
+        });
+
+        if (task.isComplete) entryInput.checked = true;
+
+        // entryLabel.setAttribute("tabIndex", `${entryInput.tabIndex}`);
+        // entryInput.setAttribute("tabIndex", "-1");
+        const customCheck = make('span.checkbox', entryLabel);
+
+        return entry;
     }
 
-    function onEndQuest() {
+    function loadSelectedQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
-        quest.complete();
-        loadSelectedQuestGroup();
+        clearDisplayedTasks();
+        for (let i = 0; i < quest.tasks.length; i++) {
+            const entry = generateTaskEntry(quest, i); 
+            if (quest.tasks[i].isComplete) {
+                compTaskList.append(entry);
+            } else {
+                taskList.append(entry);
+            }
+        }
 
-        toggleClass(this, 'activated');
+        if (!quest.isComplete) {
+            conditionallyToggleTaskEnder();
+        }
     }
 
+    function generateQuestEntry(quests, questIndex){
+        const entry = make('li'); 
+        const i = questIndex;
+        entry.dataset.index = i;
+            const entryButton = make('button.quest-select', entry);
+            entryButton.setAttribute("type", "button");
+            entryButton.textContent = quests[i].name; 
+            entryButton.addEventListener('click', onQuestSelect);
+
+            if (quests[i].dueDate != null){
+                const dueDisplay = make('button.due', entry);
+                dueDisplay.textContent = formateDate(quests[i].dueDate);
+            }
+
+        const moreButton = make('button.more', entry);
+            const moreIcon = createDropdownIcon();
+            moreButton.append(moreIcon);
+
+            
+            const moreOptions = make('div.more-options.hidden', moreButton);
+                const deleteQuest = make('button.delete-option', moreOptions);
+                deleteQuest.textContent = 'Delete';
+
+                deleteQuest.addEventListener('click', () => {
+                    selectedQuestGroup.removeQuest(i);
+                    resetSelectedQuest();
+                    loadSelectedQuestGroup();
+                });
+
+                const editQuestName = make('button.edit-name-option', moreOptions);
+                editQuestName.textContent = 'Edit';
+
+                editQuestName.addEventListener('click', () => {
+                    entry.classList.add('hidden');
+
+                    const editor = make('input.name-editor');
+                    editor.setAttribute('type', 'text');
+                    editor.value = quests[i].name;
+                    entry.after(editor);
+
+                    editor.focus();
+
+                    const submitEdit = () => {
+                        quests[i].name = editor.value;
+                        entryButton.textContent = quests[i].name;
+                        entry.classList.remove('hidden');
+                        
+                        editor.remove();
+                    };
+                    editor.addEventListener('focusout', submitEdit);
+
+                    editor.addEventListener("keydown", (e) => {
+                        if (e.keyCode === 13){
+                            submitEdit();
+                        }
+                    });
+                });
+
+        moreOptions.setAttribute('tabindex', 0);
+        moreButton.addEventListener('click', () => { 
+            const last = query('div.more-quest-options:not(.hidden)', questContainer);
+            if (last && last !== moreOptions) {
+                last.classList.add('hidden');
+            } 
+
+            toggleClass(moreOptions, 'hidden');
+            moreOptions.focus(); 
+        });
+        moreOptions.addEventListener('blur', (e) => {
+            if (!entry.querySelector('.more:hover')){
+                moreOptions.classList.add('hidden');
+            }
+        });
+
+        return entry;
+    }
     
-    function onAddTask(){
+    function loadSelectedQuestGroup() {
+        const quests = selectedQuestGroup.quests;
+        clearDisplayedQuests();
+        clearDisplayedTasks(); 
+        for (let i = 0; i < quests.length; i++){
+            const entry = generateQuestEntry(quests, i); 
+
+            if (quests[i].isComplete){
+                compQuestList.append(entry);
+            } else {
+                questList.append(entry);
+            }
+        }
+    }
+
+
+    // Button event handlers
+    function onAddTask() {
         if (selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
             const wrapperForm = make("form#task-adder-form", taskList);
             wrapperForm.setAttribute("onsubmit", "return false");
@@ -512,9 +461,58 @@ const DisplayInteractionManager = (function(body, user) {
             });
 
             newTaskInput.focus();
-
         }
     }
 
+    function onQuestSubmission() {
+        toggleClass(questAdder, "selected");
+        toggleClass(questPrompt, "activated");
+
+        const questName = questNameInput.value;
+        const questDue = (Date.parse(questDueInput.value)) ? new Date(questDueInput.value) : null;
+        console.log(questDueInput.value);
+
+        console.log({questName, questDue});
+        selectedQuestGroup.makeQuest(questName, [], questDue);
+        loadSelectedQuestGroup();
+        loadFirstQuest();
+    }
+
+    function onAddQuest() {
+        toggleClass(this, "selected");
+        toggleClass(questPrompt, "activated");
+    }
+
+    function onEndQuest() {
+        const quest = selectedQuestGroup.quests[selectedQuestIndex];
+        quest.complete();
+        loadSelectedQuestGroup();
+
+        toggleClass(this, 'activated');
+    }
+
+    function onQuestSelect() {
+        reassignSelectionStyle(this);
+
+        selectedQuestIndex = this.parentNode.dataset.index;
+
+        loadSelectedQuest();
+    }
+
+    function onQuestGroupSelect(questGroup) {
+        if (questGroup !== selectedQuestGroup) {
+            query(".selected", nav).classList.remove("selected");
+        }
+        selectedQuestGroup = questGroup;
+        this.classList.add("selected");
+        loadSelectedQuestGroup();
+        
+        const firstQuest = selectedQuestGroup.quests[0];
+        if (firstQuest) {
+            loadFirstQuest();
+        } else {
+            selectedQuestIndex = null;
+        }
+    }
 
 })(body, user);
