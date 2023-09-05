@@ -47,8 +47,33 @@ for (let i = 0; i < randomInt(5, 4); i++) {
 
 // ...
 
-
 const DisplayInteractionManager = (function(body, user) {
+    const QuestGroupHandler = new Map();
+    QuestGroupHandler.set(user.staticQuests, {
+        getDueLabel() {
+            const questDueLabel = make("label");
+            questDueLabel.setAttribute("for", "get-quest-due");
+            questDueLabel.textContent = "Due date: ";
+
+            const questDueInput = make('input#get-quest-due', questDueLabel); 
+            questDueInput.setAttribute("type", "date");
+
+            return questDueLabel;
+        }
+    });
+    QuestGroupHandler.set(user.dailyQuests, {
+        getDueLabel() {
+
+        }
+    });
+    QuestGroupHandler.set(user.weeklyQuests, {
+        getDueLabel() {
+
+        }
+    });
+
+    let selectedQuestGroup = user.staticQuests; 
+    let selectedQuestIndex;
 
     // Utility functions
     function reassignSelectionStyle(newSelected) {
@@ -348,10 +373,61 @@ const DisplayInteractionManager = (function(body, user) {
             }
         }
 
+
+        function _onQuestSubmission() {
+            const questName = query('#get-quest-name').value;
+
+            const dueInput = query('#get-quest-due');
+            const questDue = (Date.parse(dueInput.value)) ? new Date(dueInput.value) : null;
+            
+            if (questName.length > 0) {
+                toggleClass(questAdder, "selected");
+
+                const questPrompt = query('.quest-prompt');
+                toggleClass(questPrompt, "activated");
+
+                selectedQuestGroup.makeQuest(questName, [], questDue);
+                DataDisplayer.loadSelectedQuestGroup();
+                DataDisplayer.loadFirstQuest();
+            }
+        }
+
+        function generateQuestPrompt() {
+            const questPrompt = make('div.quest-prompt');
+            questContainer.prepend(questPrompt); 
+                const questPromptTop = make('div.quest-prompt-top', questPrompt);
+                const questPromptBody = make('form.quest-prompt-body', questPrompt);
+                questPromptBody.setAttribute("action", "#");
+                questPromptBody.setAttribute("method", "post");
+
+                    const questNameLabel = make("label", questPromptBody);
+                    questNameLabel.setAttribute("for", "get-quest-name");
+                    questNameLabel.textContent = "Quest name: ";
+
+                    const questNameInput = make('input#get-quest-name', questNameLabel);
+                    questNameInput.setAttribute("type", "text");
+                    questNameInput.setAttribute("placeholder", "Name here");
+                    
+
+                    // Insert due input here
+                    const questDueLabel = QuestGroupHandler.get(selectedQuestGroup).getDueLabel();
+                    questPromptBody.append(questDueLabel);
+
+                    const submitQuest = make('button#submit-quest', questPromptBody);
+                    submitQuest.setAttribute("type", "reset");
+                    submitQuest.addEventListener("click", _onQuestSubmission);
+                    submitQuest.textContent = "Ok";
+
+                const questPromptLow = make('div.quest-prompt-low', questPrompt);
+
+            return questPrompt;
+        }
+
         return {
             loadFirstQuest,
             loadSelectedQuest,
-            loadSelectedQuestGroup
+            loadSelectedQuestGroup,
+            generateQuestPrompt
         };
     }();
 
@@ -388,23 +464,11 @@ const DisplayInteractionManager = (function(body, user) {
             }
         }
 
-        function onQuestSubmission() {
-            toggleClass(questAdder, "selected");
-            toggleClass(questPrompt, "activated");
-
-            const questName = questNameInput.value;
-            const questDue = (Date.parse(questDueInput.value)) ? new Date(questDueInput.value) : null;
-            console.log(questDueInput.value);
-
-            console.log({questName, questDue});
-            selectedQuestGroup.makeQuest(questName, [], questDue);
-            DataDisplayer.loadSelectedQuestGroup();
-            DataDisplayer.loadFirstQuest();
-        }
 
         function onAddQuest() {
             toggleClass(this, "selected");
-            toggleClass(questPrompt, "activated");
+            const lastPrompt = query(".quest-prompt");
+            toggleClass(lastPrompt, "activated");
         }
 
         function onEndQuest() {
@@ -437,11 +501,12 @@ const DisplayInteractionManager = (function(body, user) {
             } else {
                 selectedQuestIndex = null;
             }
+
+            DataDisplayer.generateQuestPrompt();
         }
 
         return {
             onAddTask,
-            onQuestSubmission,
             onAddQuest,
             onEndQuest, 
             onQuestSelect,
@@ -461,34 +526,6 @@ const DisplayInteractionManager = (function(body, user) {
         const content = make('div.content', main);
             const leftSection = make('section.left', content);
                 const questContainer = make('div.quest-container', leftSection);
-                    const questPrompt = make('div.quest-prompt', questContainer);
-                        const questPromptTop = make('div.quest-prompt-top', questPrompt);
-                        const questPromptBody = make('form.quest-prompt-body', questPrompt);
-                        questPromptBody.setAttribute("action", "#");
-                        questPromptBody.setAttribute("method", "post");
-
-                            const questNameLabel = make("label", questPromptBody);
-                            questNameLabel.setAttribute("for", "get-quest-name");
-                            questNameLabel.textContent = "Quest name: ";
-
-                            const questNameInput = make('input#get-quest-name', questNameLabel);
-                            questNameInput.setAttribute("type", "text");
-                            questNameInput.setAttribute("placeholder", "Name here");
-                            
-
-                            const questDueLabel = make("label", questPromptBody);
-                            questDueLabel.setAttribute("for", "get-quest-due");
-                            questDueLabel.textContent = "Due date: ";
-
-                            const questDueInput = make('input#get-quest-due', questDueLabel); 
-                            questDueInput.setAttribute("type", "date");
-
-                            const submitQuest = make('button#submit-quest', questPromptBody);
-                            submitQuest.setAttribute("type", "reset");
-                            submitQuest.addEventListener("click", ButtonHandler.onQuestSubmission);
-                            submitQuest.textContent = "Ok";
-
-                        const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
                     const questList = make('ul.quests', questContainer);
                     const compQuestList = make('ul.completed.quests', questContainer);
@@ -529,8 +566,6 @@ const DisplayInteractionManager = (function(body, user) {
                 pickWeekly.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
     // ...
 
-    let selectedQuestGroup = user.staticQuests; 
-    let selectedQuestIndex;
     ButtonHandler.onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
 
 
