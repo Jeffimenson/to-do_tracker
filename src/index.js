@@ -63,7 +63,14 @@ const DisplayInteractionManager = (function(body, user) {
     });
     QuestGroupHandler.set(user.dailyQuests, {
         getDueLabel() {
+            const questDueLabel = make("label");
+            questDueLabel.setAttribute("for", "get-quest-due");
+            questDueLabel.textContent = "Due day: ";
 
+            const questDueInput = make('input#get-quest-due', questDueLabel); 
+            questDueInput.setAttribute("type", "time");
+
+            return questDueLabel;
         }
     });
     QuestGroupHandler.set(user.weeklyQuests, {
@@ -365,7 +372,7 @@ const DisplayInteractionManager = (function(body, user) {
             for (let i = 0; i < quests.length; i++){
                 const entry = _generateQuestEntry(quests, i); 
 
-                if (quests[i].isComplete){
+                if (quests[i].isComplete) {
                     compQuestList.append(entry);
                 } else {
                     questList.append(entry);
@@ -408,8 +415,6 @@ const DisplayInteractionManager = (function(body, user) {
                     questNameInput.setAttribute("type", "text");
                     questNameInput.setAttribute("placeholder", "Name here");
                     
-
-                    // Insert due input here
                     const questDueLabel = QuestGroupHandler.get(selectedQuestGroup).getDueLabel();
                     questPromptBody.append(questDueLabel);
 
@@ -420,7 +425,6 @@ const DisplayInteractionManager = (function(body, user) {
 
                 const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
-            return questPrompt;
         }
 
         return {
@@ -464,7 +468,6 @@ const DisplayInteractionManager = (function(body, user) {
             }
         }
 
-
         function onAddQuest() {
             toggleClass(this, "selected");
             const lastPrompt = query(".quest-prompt");
@@ -481,9 +484,7 @@ const DisplayInteractionManager = (function(body, user) {
 
         function onQuestSelect() {
             reassignSelectionStyle(this);
-
             selectedQuestIndex = this.parentNode.dataset.index;
-
             DataDisplayer.loadSelectedQuest();
         }
 
@@ -502,6 +503,18 @@ const DisplayInteractionManager = (function(body, user) {
                 selectedQuestIndex = null;
             }
 
+
+            const oldPrompt = query('.quest-prompt');
+            if (oldPrompt) {
+                oldPrompt.remove();
+
+                const selectedAdder = query('.quest-adder.selected');
+                console.log(selectedAdder);
+                if (selectedAdder) {
+                    selectedAdder.classList.remove('selected');
+                }
+            }
+
             DataDisplayer.generateQuestPrompt();
         }
 
@@ -511,7 +524,7 @@ const DisplayInteractionManager = (function(body, user) {
             onEndQuest, 
             onQuestSelect,
             onQuestGroupSelect 
-        }
+        };
     }(DataDisplayer); 
 
     // Dom generation code
@@ -567,9 +580,5 @@ const DisplayInteractionManager = (function(body, user) {
     // ...
 
     ButtonHandler.onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
-
-
-
-    
 
 })(body, user);
