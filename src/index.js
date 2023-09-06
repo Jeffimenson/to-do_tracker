@@ -404,6 +404,7 @@ const DisplayInteractionManager = (function(body, user) {
             questContainer.prepend(questPrompt); 
                 const questPromptTop = make('div.quest-prompt-top', questPrompt);
                 const questPromptBody = make('form.quest-prompt-body', questPrompt);
+                questPromptBody.setAttribute('onsubmit', 'return false'); // Might have to change this if I actually make this submit somewhere
                 questPromptBody.setAttribute("action", "#");
                 questPromptBody.setAttribute("method", "post");
 
@@ -414,6 +415,13 @@ const DisplayInteractionManager = (function(body, user) {
                     const questNameInput = make('input#get-quest-name', questNameLabel);
                     questNameInput.setAttribute("type", "text");
                     questNameInput.setAttribute("placeholder", "Name here");
+
+                    questNameInput.addEventListener('keyup', (e) => {
+                        if (e.keyCode === 13) {
+                            _onQuestSubmission();
+                            questPromptBody.reset();
+                        }
+                    });
                     
                     const questDueLabel = QuestGroupHandler.get(selectedQuestGroup).getDueLabel();
                     questPromptBody.append(questDueLabel);
@@ -425,6 +433,7 @@ const DisplayInteractionManager = (function(body, user) {
 
                 const questPromptLow = make('div.quest-prompt-low', questPrompt);
 
+                questNameInput.focus(); // Not working for some reason :(
         }
 
         return {
@@ -439,7 +448,7 @@ const DisplayInteractionManager = (function(body, user) {
         function onAddTask() {
             if (selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
                 const wrapperForm = make("form#task-adder-form", taskList);
-                wrapperForm.setAttribute("onsubmit", "return false");
+                wrapperForm.setAttribute("onsubmit", "return false"); // Might have to change this if I actually make this submit somewhere
 
                 const newTaskInput = make("input#create-new-task", wrapperForm);
                 newTaskInput.setAttribute("placeholder", "New task");
@@ -458,7 +467,7 @@ const DisplayInteractionManager = (function(body, user) {
                 };
                 submit.addEventListener("pointerdown", submitTaskFunc);
 
-                newTaskInput.addEventListener("keydown", (e) => {
+                newTaskInput.addEventListener("keyup", (e) => {
                     if (e.keyCode === 13){
                         submitTaskFunc();
                     }
@@ -470,6 +479,7 @@ const DisplayInteractionManager = (function(body, user) {
 
         function onAddQuest() {
             toggleClass(this, "selected");
+
             const lastPrompt = query(".quest-prompt");
             toggleClass(lastPrompt, "activated");
         }
