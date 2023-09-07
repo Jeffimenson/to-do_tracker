@@ -9,7 +9,11 @@ function formatFullDate(date){
     return format(date, 'MM.dd.yy, hh:mm aa');
 }
 
-function formateDate(date){
+function formatDateToTime(date) {
+    return format(date, 'hh:mm aa');
+}
+
+function formatDate(date){
     return format(date, 'MM.dd.yy');
 }
 
@@ -59,24 +63,98 @@ const DisplayInteractionManager = (function(body, user) {
             questDueInput.setAttribute("type", "date");
 
             return questDueLabel;
+        },
+        onQuestSubmission() {
+            const questName = query('#get-quest-name').value;
+
+            const dueInput = query('#get-quest-due');
+            const questDue = (Date.parse(dueInput.value)) ? new Date(dueInput.value) : null;
+            
+            if (questName.length > 0) {
+                toggleClass(questAdder, "selected");
+
+                const questPrompt = query('.quest-prompt');
+                toggleClass(questPrompt, "activated");
+
+                selectedQuestGroup.makeQuest(questName, [], questDue);
+                DataDisplayer.loadSelectedQuestGroup();
+                DataDisplayer.loadFirstQuest();
+            }
+        },
+        getTimeDisplay(quest) {
+            const dueDisplay = make('button.due');
+            dueDisplay.textContent = formatDate(quest.dueDate);
+            return dueDisplay;
         }
     });
+
     QuestGroupHandler.set(user.dailyQuests, {
         getDueLabel() {
             const questDueLabel = make("label");
             questDueLabel.setAttribute("for", "get-quest-due");
-            questDueLabel.textContent = "Due day: ";
+            questDueLabel.textContent = "Due time: ";
 
             const questDueInput = make('input#get-quest-due', questDueLabel); 
             questDueInput.setAttribute("type", "time");
 
             return questDueLabel;
+        },
+        onQuestSubmission() {
+            const questName = query('#get-quest-name').value;
+
+            const dueInput = query('#get-quest-due');
+            const [hour, minute] = dueInput.value.split(':');
+            const questDue = DailyTime(hour, minute);
+            
+            
+            if (questName.length > 0) {
+                toggleClass(questAdder, "selected");
+
+                const questPrompt = query('.quest-prompt');
+                toggleClass(questPrompt, "activated");
+
+                selectedQuestGroup.makeQuest(questName, [], questDue);
+                DataDisplayer.loadSelectedQuestGroup();
+                DataDisplayer.loadFirstQuest();
+            }
+        },
+        getTimeDisplay(quest) {
+            const dueDisplay = make('button.due');
+            dueDisplay.textContent = formatDateToTime(quest.dueDate);
+            return dueDisplay;
         }
     });
+
+    
+    function _makeDayGetter(dayName, container) {
+        const but = make('button.due-day-getter', container);
+        but.textContent = dayName;
+        but.setAttribute('type', 'button');
+        but.dataset.dayId = Day[dayName];
+        
+    }
     QuestGroupHandler.set(user.weeklyQuests, {
         getDueLabel() {
+            const questDueLabel = make("label");
+            questDueLabel.setAttribute("for", "get-quest-due");
+            questDueLabel.textContent = "Due: ";
 
-        }
+            const inputContainer = make('div.due-container', questDueLabel);
+            _makeDayGetter('Sun', inputContainer);
+            _makeDayGetter('Mon', inputContainer);
+            _makeDayGetter('Tue', inputContainer);
+            _makeDayGetter('Wed', inputContainer);
+            _makeDayGetter('Thu', inputContainer);
+            _makeDayGetter('Fri', inputContainer);
+            _makeDayGetter('Sat', inputContainer);
+
+
+            const questDueTimeInput = make('input#get-quest-due', questDueLabel); 
+            questDueTimeInput.setAttribute("type", "time");
+
+            return questDueLabel;
+        },
+
     });
 
     let selectedQuestGroup = user.staticQuests; 
@@ -283,6 +361,7 @@ const DisplayInteractionManager = (function(body, user) {
             selectedQuestIndex = null;
             questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
         }
+
         function _generateQuestEntry(quests, questIndex){
             const entry = make('li'); 
             const i = questIndex;
@@ -293,8 +372,9 @@ const DisplayInteractionManager = (function(body, user) {
                 entryButton.addEventListener('click', ButtonHandler.onQuestSelect);
 
                 if (quests[i].dueDate != null){
-                    const dueDisplay = make('button.due', entry);
-                    dueDisplay.textContent = formateDate(quests[i].dueDate);
+                    const questGroupHandler = QuestGroupHandler.get(selectedQuestGroup);
+                    const timeDisplay = questGroupHandler.getTimeDisplay(quests[i]);
+                    entry.append(timeDisplay);
                 }
 
             const moreButton = make('button.more', entry);
@@ -423,12 +503,13 @@ const DisplayInteractionManager = (function(body, user) {
                         }
                     });
                     
-                    const questDueLabel = QuestGroupHandler.get(selectedQuestGroup).getDueLabel();
+                    const questGroupHandler = QuestGroupHandler.get(selectedQuestGroup);
+                    const questDueLabel = questGroupHandler.getDueLabel();
                     questPromptBody.append(questDueLabel);
 
                     const submitQuest = make('button#submit-quest', questPromptBody);
                     submitQuest.setAttribute("type", "reset");
-                    submitQuest.addEventListener("click", _onQuestSubmission);
+                    submitQuest.addEventListener("click", questGroupHandler.onQuestSubmission);
                     submitQuest.textContent = "Ok";
 
                 const questPromptLow = make('div.quest-prompt-low', questPrompt);
@@ -519,7 +600,6 @@ const DisplayInteractionManager = (function(body, user) {
                 oldPrompt.remove();
 
                 const selectedAdder = query('.quest-adder.selected');
-                console.log(selectedAdder);
                 if (selectedAdder) {
                     selectedAdder.classList.remove('selected');
                 }

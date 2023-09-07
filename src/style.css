@@ -258,6 +258,31 @@ section.left .quest-container {
 #get-quest-due {
     display: inline;
 }
+
+
+.due-container {
+    display: inline-flex;
+    gap: 4px;
+    margin-right: 16px;
+}
+
+.due-container .due-day-getter {
+    border: 2px solid var(--pip-darkened);
+    color: var(--pip-darkened);
+    font-family: monospace;
+    font-size: 0.8rem;
+    padding: 0.2rem;
+
+}
+
+.due-container .due-day-getter:hover {
+    color: var(--pip-green);
+}
+
+.due-container .due-day-getter:active {
+    border-color: var(--pip-darkened);
+    color: var(--pip-darkened);
+}
 /*...*/
 
 /* quests display */ 
@@ -324,6 +349,8 @@ ul.quests li button.due {
     padding: 0;
 
     align-self: center;
+
+    color: var(--pip-darkened);
 }
 
 ul.quests li button.due:hover {

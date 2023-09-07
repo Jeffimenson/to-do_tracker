@@ -242,7 +242,7 @@ class DailyQuestGroup extends QuestGroup {
 
 class WeeklyQuestGroup extends QuestGroup {
 
-    makeQuest(name, tasks, weeklyTime){
+    makeQuest(name, tasks, weeklyTime) {
         const date = new Date();
 
         const dayDiff = date.getDay() - weeklyTime.day; 
@@ -255,7 +255,7 @@ class WeeklyQuestGroup extends QuestGroup {
         this.addQuest(qst);
     }
 
-    resetQuests(){
+    resetQuests() {
         for (let i = 0; i < this.quests.length; i++){
             const currQuest = this.getQuest(i);
             const dueDate = currQuest.dueDate;
