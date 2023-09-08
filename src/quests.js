@@ -244,8 +244,8 @@ class WeeklyQuestGroup extends QuestGroup {
 
     makeQuest(name, tasks, weeklyTime) {
         const date = new Date();
-
         const dayDiff = date.getDay() - weeklyTime.day; 
+
         const dayOfMonth = date.getDate() - dayDiff; 
         date.setDate(dayOfMonth);
 

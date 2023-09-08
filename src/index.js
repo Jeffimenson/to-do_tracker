@@ -22,6 +22,15 @@ function getDateNow(){
     return stylizeDateFormat(d);
 }
 
+function parseDate(input) {
+
+  let [year, month, day] = input.split('-');
+
+  const date = new Date(year, month, day, 0, 0, 0);
+  console.log(date);
+  return date;
+}
+
 class User {
     staticQuests = new StaticQuestGroup();
     dailyQuests = new DailyQuestGroup();
@@ -68,7 +77,8 @@ const DisplayInteractionManager = (function(body, user) {
             const questName = query('#get-quest-name').value;
 
             const dueInput = query('#get-quest-due');
-            const questDue = (Date.parse(dueInput.value)) ? new Date(dueInput.value) : null;
+            const questDue = (parseDate(dueInput.value)) ? parseDate(dueInput.value) : null;
+            console.log(dueInput.value);
             
             if (questName.length > 0) {
                 toggleClass(questAdder, "selected");
@@ -126,11 +136,20 @@ const DisplayInteractionManager = (function(body, user) {
     });
 
     
+    let selectedDay = null;
     function _makeDayGetter(dayName, container) {
         const but = make('button.due-day-getter', container);
         but.textContent = dayName;
         but.setAttribute('type', 'button');
         but.dataset.dayId = Day[dayName];
+
+        but.addEventListener('click', () => {
+            selectedDay = Day[dayName];
+
+            const lastSelect = query('.due-day-getter.selected');
+            if (lastSelect) lastSelect.classList.remove('selected');
+            but.classList.add('selected');
+        });
         
     }
     QuestGroupHandler.set(user.weeklyQuests, {
@@ -140,21 +159,44 @@ const DisplayInteractionManager = (function(body, user) {
             questDueLabel.textContent = "Due: ";
 
             const inputContainer = make('div.due-container', questDueLabel);
-            _makeDayGetter('Sun', inputContainer);
-            _makeDayGetter('Mon', inputContainer);
-            _makeDayGetter('Tue', inputContainer);
-            _makeDayGetter('Wed', inputContainer);
-            _makeDayGetter('Thu', inputContainer);
-            _makeDayGetter('Fri', inputContainer);
-            _makeDayGetter('Sat', inputContainer);
-
+            for (const [key, val] of Object.entries(Day)) {
+                _makeDayGetter.call(this, key, inputContainer);
+            }
 
             const questDueTimeInput = make('input#get-quest-due', questDueLabel); 
             questDueTimeInput.setAttribute("type", "time");
 
             return questDueLabel;
         },
+        onQuestSubmission() {
+            const questName = query('#get-quest-name').value;
 
+            const timeInput = query("#get-quest-due[type='time'");
+            let [hour, minute] = timeInput.value.split(':');
+            if (timeInput.value.length === 0) {
+                hour = 0;
+                minute = 0;
+            }
+
+            const sDay = selectedDay;
+            const questDue = WeeklyTime(sDay, hour, minute);
+            
+            if (questName.length > 0) {
+                toggleClass(questAdder, "selected");
+
+                const questPrompt = query('.quest-prompt');
+                toggleClass(questPrompt, "activated");
+
+                selectedQuestGroup.makeQuest(questName, [], questDue);
+                DataDisplayer.loadSelectedQuestGroup();
+                DataDisplayer.loadFirstQuest();
+            }
+        },
+        getTimeDisplay(quest) {
+            const dueDisplay = make('button.due');
+            dueDisplay.textContent = formatDate(quest.dueDate);
+            return dueDisplay;
+        }
     });
 
     let selectedQuestGroup = user.staticQuests; 
