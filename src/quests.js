@@ -154,11 +154,17 @@ class QuestGroup {
         this.#quests.splice(index, 1);
     }
 
-    swapQuests(i1, i2){
-        const temp = this.#quests[i1];
-        this.#quests[i1] = this.#quests[i2];
-        this.#quests[i2] = temp;
+    moveQuest(fromIndex, toIndex){
+        const quest = this.#quests[fromIndex];
+        this.removeQuest(fromIndex, 1);
+        this.#quests.splice(toIndex, 0, quest);
     }
+
+    // swapQuests(i1, i2){
+    //     const temp = this.#quests[i1];
+    //     this.#quests[i1] = this.#quests[i2];
+    //     this.#quests[i2] = temp;
+    // }
 
     getQuest(index){
         return this.#quests[index];

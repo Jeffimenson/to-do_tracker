@@ -27,7 +27,6 @@ function parseDate(input) {
   let [year, month, day] = input.split('-');
 
   const date = new Date(year, month, day, 0, 0, 0);
-  console.log(date);
   return date;
 }
 
@@ -78,7 +77,6 @@ const DisplayInteractionManager = (function(body, user) {
 
             const dueInput = query('#get-quest-due');
             const questDue = (parseDate(dueInput.value)) ? parseDate(dueInput.value) : null;
-            console.log(dueInput.value);
             
             if (questName.length > 0) {
                 toggleClass(questAdder, "selected");
@@ -152,6 +150,7 @@ const DisplayInteractionManager = (function(body, user) {
         });
         
     }
+    const dayIndices = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     QuestGroupHandler.set(user.weeklyQuests, {
         getDueLabel() {
             const questDueLabel = make("label");
@@ -194,7 +193,14 @@ const DisplayInteractionManager = (function(body, user) {
         },
         getTimeDisplay(quest) {
             const dueDisplay = make('button.due');
-            dueDisplay.textContent = formatDate(quest.dueDate);
+            const day = dayIndices[quest.dueDate.getDay()]
+
+            let text = day
+
+            const time = formatDateToTime(quest.dueDate);
+            text += ` ${time}`
+
+            dueDisplay.textContent = text;
             return dueDisplay;
         }
     });
@@ -404,6 +410,9 @@ const DisplayInteractionManager = (function(body, user) {
             questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
         }
 
+
+        let upIndex;
+        let downIndex;
         function _generateQuestEntry(quests, questIndex){
             const entry = make('li'); 
             const i = questIndex;
@@ -476,6 +485,18 @@ const DisplayInteractionManager = (function(body, user) {
             moreOptions.addEventListener('blur', (e) => {
                 if (!entry.querySelector('.more:hover')){
                     moreOptions.classList.add('hidden');
+                }
+            });
+
+            // Drag-and-drop code (maybe redo to use html drag and drop)
+            entryButton.addEventListener('pointerdown', () => {
+                downIndex = questIndex;
+            });
+
+            entryButton.addEventListener('pointerup', () => {
+                upIndex = questIndex;
+                if (upIndex !== downIndex && downIndex != undefined) {
+                    
                 }
             });
 
@@ -619,6 +640,7 @@ const DisplayInteractionManager = (function(body, user) {
             reassignSelectionStyle(this);
             selectedQuestIndex = this.parentNode.dataset.index;
             DataDisplayer.loadSelectedQuest();
+
         }
 
         function onQuestGroupSelect(questGroup) {
