@@ -379,6 +379,7 @@ const DisplayInteractionManager = (function(body, user) {
             // entryInput.setAttribute("tabIndex", "-1");
             const customCheck = make('span.checkbox', entryLabel);
 
+
             return entry;
         }
 
@@ -411,13 +412,13 @@ const DisplayInteractionManager = (function(body, user) {
         }
 
 
-        let upIndex;
-        let downIndex;
+        let currDraggedIndex;
         function _generateQuestEntry(quests, questIndex){
             const entry = make('li'); 
             const i = questIndex;
             entry.dataset.index = i;
-                const entryButton = make('button.quest-select', entry);
+                const entryButton = make('div.quest-select', entry); // Can't be real button or else dragging won't work on firefox
+                entryButton.setAttribute("tabIndex", 0); // Put tab index on manually since entryButton is not a real button (but interacting still doesn't work)
                 entryButton.setAttribute("type", "button");
                 entryButton.textContent = quests[i].name; 
                 entryButton.addEventListener('click', ButtonHandler.onQuestSelect);
@@ -466,9 +467,7 @@ const DisplayInteractionManager = (function(body, user) {
                         editor.addEventListener('focusout', submitEdit);
 
                         editor.addEventListener("keydown", (e) => {
-                            if (e.keyCode === 13){
-                                submitEdit();
-                            }
+                            if (e.keyCode === 13) submitEdit();
                         });
                     });
 
@@ -488,18 +487,22 @@ const DisplayInteractionManager = (function(body, user) {
                 }
             });
 
-            // Drag-and-drop code (maybe redo to use html drag and drop)
-            entryButton.addEventListener('pointerdown', () => {
-                downIndex = questIndex;
-            });
+            // Drag-and-drop code (LEFT OFF HERE!)
+            entry.setAttribute("draggable", true);
+            entry.addEventListener("dragenter", () => {
+                if (currDraggedIndex !== i) {
+                    selectedQuestGroup.moveQuest(currDraggedIndex, i);
+                    loadSelectedQuestGroup();
 
-            entryButton.addEventListener('pointerup', () => {
-                upIndex = questIndex;
-                if (upIndex !== downIndex && downIndex != undefined) {
-                    
+                    const newParent = query(`[data-index="${i}"`, questList); // change this later to display selectedQuestIndex quest instead of currently dragged quest
+                    const newButton = query('.quest-select', newParent);
+                    ButtonHandler.onQuestSelect.call(newButton); // this should for sure mean this drag system wont work for completed quests
+                    currDraggedIndex = i; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
                 }
             });
-
+            entry.addEventListener("dragstart", () => {
+                currDraggedIndex = i;
+            })
             return entry;
         }
         

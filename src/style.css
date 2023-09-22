@@ -259,7 +259,6 @@ section.left .quest-container {
     display: inline;
 }
 
-
 .due-container {
     display: inline-flex;
     gap: 4px;
@@ -317,16 +316,17 @@ section.left ul.quests li:hover {
     border-color: var(--pip-green);
 }
 
-section.left ul.quests li button.quest-select {
+section.left ul.quests li .quest-select {
     width: 100%;
     padding: 10px 45px;
     box-sizing: border-box;
     text-align: left;
+    cursor: pointer;
 
     border: 0;
 }
 
-section.left ul.quests li button.quest-select:hover {
+section.left ul.quests li .quest-select:hover {
     border: 0;
 }
 
@@ -334,7 +334,7 @@ section.left ul.completed.quests li button {
     color: var(--pip-darkened);
 }
 
-section.left ul.quests li button.selected::before {
+section.left ul.quests li .selected::before {
     content: "";
     position: absolute;
     width: 10px;
@@ -348,7 +348,7 @@ section.left ul.quests li button.selected::before {
 
 }
 
-section.left ul.completed.quests li button.selected::before {
+section.left ul.completed.quests li .selected::before {
     border-color: var(--pip-darkened);
     background-color: var(--pip-darkened);
 }
