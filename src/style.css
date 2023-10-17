@@ -330,7 +330,7 @@ section.left ul.quests li .quest-select:hover {
     border: 0;
 }
 
-section.left ul.completed.quests li button {
+section.left ul.quests.completed .quest-select {
     color: var(--pip-darkened);
 }
 

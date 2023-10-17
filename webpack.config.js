@@ -17,14 +17,14 @@ module.exports = {
     clean: true,
   },
   module: {
-    rules: [
+    rules: [ // Note: npx webpack --watch doesn't detect changes in config or package.json files
         {
-            test: /\.css$/i,
-            use: ['style-loader', 'css-loader'],
+          test: /\.css$/i,
+          use: ['style-loader', 'css-loader'], // Chained from right to left
         },
         {
-            test: /\.(png|svg|jpg|jpeg|gif)$/i,
-            type: 'asset/resource',
+          test: /\.(png|svg|jpg|jpeg|gif)$/i,
+          type: 'asset/resource',
         },
     ],
   },
