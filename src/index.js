@@ -4,7 +4,6 @@ import { format, isToday, isThisWeek } from 'date-fns';
 import {make, query, toggleClass} from './jeffQuery.js';
 import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime} from './quests.js';
 
-console.log("Ola mundo"); 
 // Date formating functions
 function formatFullDate(date){
     return format(date, 'MM.dd.yy, hh:mm aa');
@@ -192,12 +191,12 @@ QuestGroupHandler.set(user.weeklyQuests, {
     },
     getTimeDisplay(quest) {
         const dueDisplay = make('button.due');
-        const day = dayIndices[quest.dueDate.getDay()]
+        const day = dayIndices[quest.dueDate.getDay()];
 
-        let text = day
+        let text = day;
 
         const time = formatDateToTime(quest.dueDate);
-        text += ` ${time}`
+        text += ` ${time}`;
 
         dueDisplay.textContent = text;
         return dueDisplay;
@@ -216,7 +215,7 @@ function reassignSelectionStyle(newSelected) {
 }
 
 
-    // Section loaders and generators
+// Section loaders and generators
 const DataDisplayer = function DataDisplayGenerationAndLoading() {
 
     function _createDropdownIcon(){
@@ -510,6 +509,7 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
 
         const dueInput = query('#get-quest-due');
         const questDue = (Date.parse(dueInput.value)) ? new Date(dueInput.value) : null;
+        console.log(questDue);
         
         if (questName.length > 0) {
             toggleClass(questAdder, "selected");
@@ -517,7 +517,11 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
             const questPrompt = query('.quest-prompt');
             toggleClass(questPrompt, "activated");
 
-            selectedQuestGroup.makeQuest(questName, [], questDue);
+            if (questDue) {
+                selectedQuestGroup.makeQuest(questName, [], questDue);
+            } else {
+                selectedQuestGroup.makeQuest(questName, []);
+            }
             DataDisplayer.loadSelectedQuestGroup();
             DataDisplayer.loadFirstQuest();
         }
@@ -568,7 +572,7 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
 
                 const submitQuest = make('button#submit-quest', questPromptBody);
                 submitQuest.setAttribute("type", "reset");
-                submitQuest.addEventListener("click", questGroupHandler.onQuestSubmission);
+                submitQuest.addEventListener("click", _onQuestSubmission);
                 submitQuest.textContent = "Ok";
 
             const questPromptLow = make('div.quest-prompt-low', questPrompt);
