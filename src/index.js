@@ -231,8 +231,11 @@ function _createDropdownIcon(){
     return moreIcon;
 }
 
+
+
 // Section loaders and generators
 const DataDisplayer = function DataDisplayGenerationAndLoading() {
+    // More utils
     function _toggleTaskEnder() {
         const taskAmount = taskList.children.length;
         if (taskAmount === 0){
@@ -241,6 +244,13 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
             questEnder.classList.remove("activated"); //doesn't matter if .activated isn't actually apart of element
         }
     }
+
+    function _clearDisplayedTasks() {
+        taskList.textContent = "";
+        compTaskList.textContent = "";
+    }
+    // ...
+
     function _onEditTaskName() {
         entry.classList.add('hidden');
 
@@ -382,10 +392,6 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
         return entry;
     }
 
-    function _clearDisplayedTasks() {
-        taskList.textContent = "";
-        compTaskList.textContent = "";
-    }
 
     function loadSelectedQuest() {
         const quest = selectedQuestGroup.quests[selectedQuestIndex];
@@ -410,17 +416,19 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
         const entry = make('li'); 
         const i = questIndex;
         entry.dataset.index = i;
-            const entryButton = make('div.quest-select', entry); // Can't be real button or else dragging won't work on firefox
-            entryButton.setAttribute("tabIndex", 0); // Put tab index on manually since entryButton is not a real button (but interacting still doesn't work)
-            entryButton.setAttribute("type", "button");
-            entryButton.textContent = quests[i].name; 
-            entryButton.addEventListener('click', ButtonHandler.onQuestSelect);
 
-            if (quests[i].dueDate != null){
-                const questGroupHandler = QuestGroupHandler.get(selectedQuestGroup);
-                const timeDisplay = questGroupHandler.getTimeDisplay(quests[i]);
-                entry.append(timeDisplay);
-            }
+        // Make button that you click to select the quest (takes up 90% of the quest slot space)
+        const entryButton = make('div.quest-select', entry); // Can't be real button or else dragging won't work on firefox
+        entryButton.setAttribute("tabIndex", 0); // Put tab index on manually since entryButton is not a real button (but interacting still doesn't work)
+        entryButton.setAttribute("type", "button");
+        entryButton.textContent = quests[i].name; 
+        entryButton.addEventListener('click', ButtonHandler.onQuestSelect);
+
+        if (quests[i].dueDate != null){
+            const questGroupHandler = QuestGroupHandler.get(selectedQuestGroup);
+            const timeDisplay = questGroupHandler.getTimeDisplay(quests[i]);
+            entry.append(timeDisplay);
+        }
 
         const moreButton = make('button.more', entry);
             const moreIcon = _createDropdownIcon();
