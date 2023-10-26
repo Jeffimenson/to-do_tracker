@@ -1,9 +1,53 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Development</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1"><script defer src="index.bundle.js"></script></head>
-  <body>
-  </body>
+<script defer src="index.bundle.js"></script></head>
+<body>
+    <main>
+        <div class="top-bar">
+            <div class="title-holder">
+                <h1 class="title">Quest Log</h1>
+            </div>
+            <div class="date">DATE HERE</div>
+        </div>
+        <div class="content">
+            <section class="left">
+                <div class="quest-container">
+                    <div class="quest-prompt">
+                        <div class="quest-prompt-top"></div>
+                        <form class="quest-prompt-body" onsubmit="return false" action="#" method="post">
+                            <label for="get-quest-name">Quest name: <input id="get-quest-name" type="text" placeholder="Name here"></label>
+                            <label for="get-quest-due">Due date: <input id="get-quest-due" type="date"></label>
+                            <button id="submit-quest" type="reset">Ok</button>
+                        </form>
+                        <div class="quest-prompt-low"></div>
+                    </div>
+                    <ul class="quests"></ul>
+                    <ul class="quests completed"></ul>
+                </div>
+                <button class="quest-adder">+</button>
+            </section>
+            <section class="right">
+                <div class="actions-container">
+                    <button class="task-adder">Add task +</button>
+                    <button class="quest-ender">End quest ×</button>
+                </div>
+                <div class="tasks-container">
+                    <ul class="tasks"></ul>
+                    <ul class="tasks completed"></ul>
+                </div>
+            </section>
+        </div>
+        <div class="low-bar">
+            <nav>
+                <button class="static-quests selected" type="button">Static</button>
+                <button class="daily-quests" type="button">Daily</button>
+                <button class="weekly-quests" type="button">Weekly</button>
+            </nav>
+        </div>
+    </main>
+</body>
 </html>
