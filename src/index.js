@@ -214,22 +214,25 @@ function reassignSelectionStyle(newSelected) {
     newSelected.classList.add("selected");
 }
 
+function _resetSelectedQuest(){
+    selectedQuestIndex = null;
+    questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
+}
+
+function _createDropdownIcon(){
+    const URI = "http://www.w3.org/2000/svg"
+    const moreIcon = document.createElementNS(URI, 'svg');
+    moreIcon.setAttribute("viewBox", "0 0 20 20");
+        const iconInternals = document.createElementNS(URI, 'path');
+        iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
+        iconInternals.setAttribute("fill", "currentColor");
+        moreIcon.append(iconInternals);
+
+    return moreIcon;
+}
 
 // Section loaders and generators
 const DataDisplayer = function DataDisplayGenerationAndLoading() {
-
-    function _createDropdownIcon(){
-        const URI = "http://www.w3.org/2000/svg"
-        const moreIcon = document.createElementNS(URI, 'svg');
-        moreIcon.setAttribute("viewBox", "0 0 20 20");
-            const iconInternals = document.createElementNS(URI, 'path');
-            iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
-            iconInternals.setAttribute("fill", "currentColor");
-            moreIcon.append(iconInternals);
-
-        return moreIcon;
-    }
-
     function _toggleTaskEnder() {
         const taskAmount = taskList.children.length;
         if (taskAmount === 0){
@@ -237,6 +240,33 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
         } else {
             questEnder.classList.remove("activated"); //doesn't matter if .activated isn't actually apart of element
         }
+    }
+    function _onEditTaskName() {
+        entry.classList.add('hidden');
+
+        const editor = make('input.name-editor');
+        editor.setAttribute('type', 'text');
+        editor.value = task.description;
+        entry.after(editor);
+
+        editor.focus();
+
+        const submitEdit = () => {
+            task.description = editor.value;
+            labelText.textContent = task.description;
+
+            entry.classList.remove('hidden');
+            
+            editor.remove();
+        };
+
+        editor.addEventListener('focusout', submitEdit);
+
+        editor.addEventListener("keydown", (e) => {
+            if (e.keyCode === 13){
+                submitEdit();
+            }
+        });
     }
 
     function _generateTaskEntry(quest, taskIndex) {
@@ -268,33 +298,7 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
 
         const editName = make('button.edit-name-option', moreOptions);
         editName.textContent = 'Edit';
-        editName.addEventListener('click', () => {
-            entry.classList.add('hidden');
-
-            const editor = make('input.name-editor');
-            editor.setAttribute('type', 'text');
-            editor.value = task.description;
-            entry.after(editor);
-
-            editor.focus();
-
-            const submitEdit = () => {
-                task.description = editor.value;
-                labelText.textContent = task.description;
-
-                entry.classList.remove('hidden');
-                
-                editor.remove();
-            };
-
-            editor.addEventListener('focusout', submitEdit);
-
-            editor.addEventListener("keydown", (e) => {
-                if (e.keyCode === 13){
-                    submitEdit();
-                }
-            });
-        });
+        editName.addEventListener('click', _onEditTaskName);
 
         moreOptions.setAttribute('tabindex', 0);
         moreButton.addEventListener('click', () => { 
@@ -400,10 +404,6 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
         }
     }
 
-    function _resetSelectedQuest(){
-        selectedQuestIndex = null;
-        questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
-    }
 
     let currDraggedIndex;
     function _generateQuestEntry(quests, questIndex){
@@ -509,7 +509,6 @@ const DataDisplayer = function DataDisplayGenerationAndLoading() {
 
         const dueInput = query('#get-quest-due');
         const questDue = (Date.parse(dueInput.value)) ? new Date(dueInput.value) : null;
-        console.log(questDue);
         
         if (questName.length > 0) {
             toggleClass(questAdder, "selected");
@@ -688,57 +687,43 @@ const ButtonHandler = function ButtonEventHandler(DataDisplayer) {
     };
 }(DataDisplayer); 
 
-// Dom generation code
-const main = make('main', body);
-    const topBar = make('div.top-bar', main);
-        const titleHolder = make('div.title-holder', topBar);
-            const title = make('h1.title', titleHolder);
-            title.textContent = "Quest Log";
-        const date = make('div.date', topBar);
-        date.textContent = "DATE HERE";
+// NEW Dom generation code
+const leftSection = body.querySelector('section.left');
+const questContainer = body.querySelector('div.quest-container');
+const questList = questContainer.querySelector('ul.quests');
+const compQuestList = questContainer.querySelector('ul.completed.quests');
+const questAdder = leftSection.querySelector('button.quest-adder');
+questAdder.textContent = "+";
+questAdder.addEventListener('click', ButtonHandler.onAddQuest);
 
-    const content = make('div.content', main);
-        const leftSection = make('section.left', content);
-            const questContainer = make('div.quest-container', leftSection);
+const rightSection = body.querySelector('section.right');
+const actionsContainer = rightSection.querySelector('div.actions-container');
+const taskAdder = actionsContainer.querySelector('button.task-adder');
+taskAdder.textContent = "Add task +";
+taskAdder.addEventListener('click', ButtonHandler.onAddTask);
 
-                const questList = make('ul.quests', questContainer);
-                const compQuestList = make('ul.completed.quests', questContainer);
+const questEnder = actionsContainer.querySelector('button.quest-ender');
+questEnder.textContent = "End quest ×";
+questEnder.addEventListener('click', ButtonHandler.onEndQuest);
 
-            const questAdder = make('button.quest-adder', leftSection);
-            questAdder.textContent = "+";
-            questAdder.addEventListener('click', ButtonHandler.onAddQuest);
+const tasksContainer = rightSection.querySelector('div.tasks-container');
+const taskList = tasksContainer.querySelector('ul.tasks');
+const compTaskList = tasksContainer.querySelector('ul.completed.tasks');
 
-        const rightSection = make('section.right', content);
-            const actionsContainer = make('div.actions-container', rightSection);
-                const taskAdder = make('button.task-adder', actionsContainer);
-                taskAdder.textContent = "Add task +";
-                taskAdder.addEventListener('click', ButtonHandler.onAddTask);
-                
-                const questEnder = make('button.quest-ender', actionsContainer);
-                questEnder.textContent = "End quest ×";
-                questEnder.addEventListener('click', ButtonHandler.onEndQuest);
+const nav = body.querySelector('nav');
+const pickStatic = nav.querySelector('button.static-quests');
+pickStatic.setAttribute("type", "button");
+pickStatic.textContent = "Static";
+pickStatic.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickStatic, user.staticQuests));
 
-            const tasksContainer = make('div.tasks-container', rightSection);
-                const taskList = make('ul.tasks', tasksContainer);
-                const compTaskList = make('ul.completed.tasks', tasksContainer);
+const pickDaily = nav.querySelector('button.daily-quests');
+pickDaily.setAttribute("type", "button");
+pickDaily.textContent = "Daily";
+pickDaily.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickDaily, user.dailyQuests));
 
-    const lowBar = make('div.low-bar', main);
-        const nav = make('nav', lowBar);
-            const pickStatic = make('button.static-quests', nav);
-            pickStatic.setAttribute("type", "button");
-            pickStatic.textContent = "Static";
-            pickStatic.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickStatic, user.staticQuests));
-
-            const pickDaily = make('button.daily-quests', nav);
-            pickDaily.setAttribute("type", "button");
-            pickDaily.textContent = "Daily";
-            pickDaily.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickDaily, user.dailyQuests));
-
-            const pickWeekly = make('button.weekly-quests', nav);
-            pickWeekly.setAttribute("type", "button");
-            pickWeekly.textContent = "Weekly";
-            pickWeekly.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
-// ...
+const pickWeekly = nav.querySelector('button.weekly-quests');
+pickWeekly.setAttribute("type", "button");
+pickWeekly.textContent = "Weekly";
+pickWeekly.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
 
 ButtonHandler.onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
-

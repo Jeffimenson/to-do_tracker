@@ -5,12 +5,6 @@ module.exports = {
   entry: {
     index: './src/index.js',
   },
-  devtool: 'inline-source-map', //for seeing errors
-  plugins: [
-    new HtmlWebpackPlugin({
-      title: 'Development', 
-    }),
-  ],
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
@@ -28,6 +22,12 @@ module.exports = {
         },
     ],
   },
+  devtool: 'inline-source-map', //for seeing errors
+  plugins: [
+    new HtmlWebpackPlugin({ // This plugin makes an html file using our output js file
+      title: 'Quest logger', 
+      template: 'src/index.html',
+    }),
+  ],
   mode: 'development',
-  
 };
