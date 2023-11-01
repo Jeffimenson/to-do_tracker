@@ -1,5 +1,5 @@
 import './style.css';
-
+import DisplayManager from './DisplayManager';
 import { format, isToday, isThisWeek } from 'date-fns';
 import {make, query, toggleClass} from './jeffQuery.js';
 import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime} from './quests.js';
@@ -697,41 +697,43 @@ const ButtonHandler = function ButtonEventHandler(DataDisplayer) {
 
 // NEW Dom generation code
 const leftSection = body.querySelector('section.left');
-const questContainer = body.querySelector('div.quest-container');
-const questList = questContainer.querySelector('ul.quests');
-const compQuestList = questContainer.querySelector('ul.completed.quests');
-const questAdder = leftSection.querySelector('button.quest-adder');
-questAdder.textContent = "+";
-questAdder.addEventListener('click', ButtonHandler.onAddQuest);
+// const questContainer = body.querySelector('div.quest-container');
+// const questList = questContainer.querySelector('ul.quests');
+// const compQuestList = questContainer.querySelector('ul.completed.quests');
+// const questAdder = leftSection.querySelector('button.quest-adder');
+// questAdder.textContent = "+";
+// questAdder.addEventListener('click', ButtonHandler.onAddQuest);
 
 const rightSection = body.querySelector('section.right');
-const actionsContainer = rightSection.querySelector('div.actions-container');
-const taskAdder = actionsContainer.querySelector('button.task-adder');
-taskAdder.textContent = "Add task +";
-taskAdder.addEventListener('click', ButtonHandler.onAddTask);
+// const actionsContainer = rightSection.querySelector('div.actions-container');
+// const taskAdder = actionsContainer.querySelector('button.task-adder');
+// taskAdder.textContent = "Add task +";
+// taskAdder.addEventListener('click', ButtonHandler.onAddTask);
 
-const questEnder = actionsContainer.querySelector('button.quest-ender');
-questEnder.textContent = "End quest ×";
-questEnder.addEventListener('click', ButtonHandler.onEndQuest);
+// const questEnder = actionsContainer.querySelector('button.quest-ender');
+// questEnder.textContent = "End quest ×";
+// questEnder.addEventListener('click', ButtonHandler.onEndQuest);
 
-const tasksContainer = rightSection.querySelector('div.tasks-container');
-const taskList = tasksContainer.querySelector('ul.tasks');
-const compTaskList = tasksContainer.querySelector('ul.completed.tasks');
+// const tasksContainer = rightSection.querySelector('div.tasks-container');
+// const taskList = tasksContainer.querySelector('ul.tasks');
+// const compTaskList = tasksContainer.querySelector('ul.completed.tasks');
 
 const nav = body.querySelector('nav');
-const pickStatic = nav.querySelector('button.static-quests');
-pickStatic.setAttribute("type", "button");
-pickStatic.textContent = "Static";
-pickStatic.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickStatic, user.staticQuests));
+// const pickStatic = nav.querySelector('button.static-quests');
+// pickStatic.setAttribute("type", "button");
+// pickStatic.textContent = "Static";
+// pickStatic.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickStatic, user.staticQuests));
 
-const pickDaily = nav.querySelector('button.daily-quests');
-pickDaily.setAttribute("type", "button");
-pickDaily.textContent = "Daily";
-pickDaily.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickDaily, user.dailyQuests));
+// const pickDaily = nav.querySelector('button.daily-quests');
+// pickDaily.setAttribute("type", "button");
+// pickDaily.textContent = "Daily";
+// pickDaily.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickDaily, user.dailyQuests));
 
-const pickWeekly = nav.querySelector('button.weekly-quests');
-pickWeekly.setAttribute("type", "button");
-pickWeekly.textContent = "Weekly";
-pickWeekly.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
+// const pickWeekly = nav.querySelector('button.weekly-quests');
+// pickWeekly.setAttribute("type", "button");
+// pickWeekly.textContent = "Weekly";
+// pickWeekly.addEventListener('click', ButtonHandler.onQuestGroupSelect.bind(pickWeekly, user.weeklyQuests));
 
-ButtonHandler.onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
+// ButtonHandler.onQuestGroupSelect.call(pickStatic /* since first selected group is set to static */, selectedQuestGroup); // Displays default quest group properly on start 
+
+const DM = new DisplayManager(user, nav, rightSection, leftSection); 
