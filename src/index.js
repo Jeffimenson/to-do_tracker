@@ -32,9 +32,12 @@ function parseDate(input) {
 // ...
 
 class User {
-    staticQuests = new StaticQuestGroup();
-    dailyQuests = new DailyQuestGroup();
-    weeklyQuests = new WeeklyQuestGroup();
+    questGroups = {
+
+        stat: new StaticQuestGroup(),
+        daily: new DailyQuestGroup(),
+        weekly: new WeeklyQuestGroup(),
+    }
     
     constructor() {}
 }
@@ -52,7 +55,7 @@ for (let i = 0; i < randomInt(5, 4); i++) {
         const task = new Task(`${randomVerbs[randomInt(randomVerbs.length)]} ${randomNouns[randomInt(randomNouns.length)]}`, false);
         tasks.push(task);
     }
-    user.staticQuests.makeQuest(`Quests ${i}`, tasks);
+    user.questGroups.stat.makeQuest(`Quests ${i}`, tasks);
 }
 // ...
 

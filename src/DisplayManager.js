@@ -38,7 +38,7 @@ function getWeeklyQuestHandler() {
 }
 // ...
 
-class QuestDisplayer { // For purely converting user quest data into visual form
+class QuestsDisplayer { // For purely converting user quest data into visual form
     // quest display dom items
     #questContainer;
     #questList;
@@ -51,36 +51,78 @@ class QuestDisplayer { // For purely converting user quest data into visual form
         this.#completedQuestList = completedQuestList;
         this.#questAdder = questAdder;
     }
+
+    clearDisplayedQuests() {
+        this.#questList.textContent = "";
+        this.#completedQuestList.textContent = "";
+    }
+
+    #generateQuestEntry(quest, index) {
+        const entry = make('li'); 
+        entry.dataset.index = index;
+
+        // Make button that you click to select the quest (takes up 90% of the quest slot space)
+        const entryButton = make('div.quest-select', entry); // Can't be real button or else dragging won't work on firefox
+        entryButton.setAttribute("tabIndex", 0); // Put tab index on manually since entryButton is not a real button (but interacting still doesn't work)
+        entryButton.setAttribute("type", "button");
+        entryButton.textContent = quest.name; 
+
+        return entry;
+    }
+
+    displayQuestGroup(questGroup) {
+        const quests = questGroup.quests; 
+        for (let i = 0; i < quests.length; i++){
+            const entry = this.#generateQuestEntry(quests[i], i); 
+
+            if (quests[i].isComplete) {
+                this.#completedQuestList.append(entry);
+            } else {
+                this.#questList.append(entry);
+            }
+
+        }
+    }
+
 }
 
-class TaskDisplayer { // For purely converting user quest data into visual form
-    taskContainer;
-    taskList; 
-    completedTaskList; 
+class TasksDisplayer { // For purely converting user quest data into visual form
+    #taskContainer;
+    #taskList; 
+    #completedTaskList; 
+
+    clearDisplayedTasks() {
+        this.#taskList.textContent = "";
+        this.#completedTaskList.textContent = "";
+    }
 
     constructor (taskContainer, taskList, completedTaskList) {
-        this.taskContainer = taskContainer; 
-        this.taskList = taskList;
-        this.completedTaskList = completedTaskList;
+        this.#taskContainer = taskContainer; 
+        this.#taskList = taskList;
+        this.#completedTaskList = completedTaskList;
     }
 }
 
 class DisplayManager {
-    // data
-    #user; 
+    #user; // stored data
+    
+    // temp data
     #selectedQuest;
     #selectedQG;
 
-    // data handling helpers
-    #taskDisplayer; 
-    #questDisplayer;
+    // stuff translating data into visuals in UI
+    #tasksDisplayer; 
+    #questsDisplayer;
 
-    // dom elements
+    // nav bar elements (stuff that lets pick current QG)
     #nav;
-    #staticPicker;
-    #dailyPicker; 
-    #weeklyPicker;
+    #QGPickers = {
+        stat: null,
+        daily: null,
+        weekly: null
+    }
 
+    // for "actions container" (has buttons that manage the currently selected quest)
     #actionsContainer;
     #taskAdder; 
     #questEnder; 
@@ -97,31 +139,56 @@ class DisplayManager {
     constructor (user, nav, rightSection, leftSection) {
         this.#user = user;
 
-        // create nav bar items
+        this.#makeNavBar(nav); // create nav bar items
+
+        this.#makeActionButtons(rightSection); // For buttons on the right section that adds tasks and completes quests
+
+        this.#setupQDerHandling(leftSection); // for quest display
+
+        this.#setupTaskDisplayer(rightSection);
+
+    }
+
+    #makeNavBar(nav) {
         this.#nav = nav; 
-        this.#staticPicker = make('button.static-quests', this.#nav);
-        this.#staticPicker.setAttribute("type", "button");
-        this.#staticPicker.textContent = "Static";
+        
+        this.#QGPickers.stat = make('button.static-quests', this.#nav);
+        this.#QGPickers.stat.setAttribute("type", "button");
+        this.#QGPickers.stat.textContent = "Static";
 
-        this.#dailyPicker = make('button.daily-quests', this.#nav);
-        this.#dailyPicker.setAttribute("type", "button");
-        this.#dailyPicker.textContent = "Daily";
+        this.#QGPickers.daily = make('button.daily-quests', this.#nav);
+        this.#QGPickers.daily.setAttribute("type", "button");
+        this.#QGPickers.daily.textContent = "Daily";
 
-        this.#weeklyPicker = make('button.weekly-quests', this.#nav);
-        this.#weeklyPicker.setAttribute("type", "button");
-        this.#weeklyPicker.textContent = "Weekly";
-        // ...
+        this.#QGPickers.weekly = make('button.weekly-quests', this.#nav);
+        this.#QGPickers.weekly.setAttribute("type", "button");
+        this.#QGPickers.weekly.textContent = "Weekly";
 
-        // For buttons on the right section that adds tasks and completes quests
+        this.#functionizeQGPickers();
+    }
+
+    #functionizeQGPickers() {
+        for (const [key, picker] of Object.entries(this.#QGPickers)) {
+            picker.addEventListener('click', () => {
+                const chosenQG = this.#user.questGroups[key];
+                this.#tasksDisplayer.clearDisplayedTasks();
+                this.#questsDisplayer.clearDisplayedQuests();
+                this.#questsDisplayer.displayQuestGroup(chosenQG);
+            }); 
+        }
+    }
+
+    #makeActionButtons(rightSection) {
         this.#actionsContainer = make('div.actions-container', rightSection);  
         this.#taskAdder = make('button.task-adder', this.#actionsContainer);
         this.#taskAdder.textContent = "Add task +";
 
         this.#questEnder = make('button.quest-ender', this.#actionsContainer);
         this.#questEnder.textContent = "End quest ×";
-        // ...
+    }
 
-        // for quest display
+    #setupQDerHandling(leftSection) {
+        // sets up quest container can quest displayer object
         const questContainer = make('div.quest-container', leftSection);
 
         const questList = make('ul.quests', questContainer);
@@ -130,13 +197,16 @@ class DisplayManager {
         const questAdder = make('button.quest-adder', leftSection);
         questAdder.textContent = "+";
         
-        this.#questDisplayer = new QuestDisplayer(questContainer, questList, completedQuestList, questAdder);
+        this.#questsDisplayer = new QuestsDisplayer(questContainer, questList, completedQuestList, questAdder);
         // ...
 
-        // declares quest prompt stuff
+        this.#makeQuestPrompt(questContainer); // For making UI box that lets user add new quests
+    }
+
+    #makeQuestPrompt(questContainer) {
         this.#questPrompt = make('div.quest-prompt');
-        
         questContainer.prepend(this.#questPrompt); 
+
         make('div.quest-prompt-top', this.#questPrompt); // just for decor
 
         this.#questPromptBody = make('form.quest-prompt-body', this.#questPrompt);
@@ -161,15 +231,15 @@ class DisplayManager {
         this.#submitQuest.textContent = "Ok";
 
         make('div.quest-prompt-low', this.#questPrompt); // also just for decor
-        // ...
 
-        // declares tasks stuff 
+    }
+
+    #setupTaskDisplayer(rightSection) {
         const tasksContainer = make('div.tasks-container', rightSection);
         const taskList = make('ul.tasks', tasksContainer);
         const compTaskList = make('ul.completed.tasks', tasksContainer);
-        // ...
 
-        this.#taskDisplayer = new TaskDisplayer(tasksContainer, taskList, compTaskList);
+        this.#tasksDisplayer = new TasksDisplayer(tasksContainer, taskList, compTaskList);
 
     }
 }
