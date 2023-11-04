@@ -66,6 +66,10 @@ function toggleClass(element, cls){
     }
 }
 
+function insertAfter(referenceNode, newNode) {
+    referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}
+
 // Object stuff
 const Factory = {
     produce(proto, publicObj={}){
@@ -76,4 +80,4 @@ const Factory = {
 
 
 // export statement
-export {make, query, Factory, toggleClass}; 
+export {make, query, Factory, toggleClass, insertAfter}; 
