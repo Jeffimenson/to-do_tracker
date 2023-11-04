@@ -33,7 +33,6 @@ function parseDate(input) {
 
 class User {
     questGroups = {
-
         stat: new StaticQuestGroup(),
         daily: new DailyQuestGroup(),
         weekly: new WeeklyQuestGroup(),
@@ -222,7 +221,7 @@ function _resetSelectedQuest(){
     questEnder.classList.remove("activated"); // In case last selected quest was in a state to be ended, or else questEnder will still show after that quest is deselected
 }
 
-function _createDropdownIcon(){
+function _createDropdownIcon() {
     const URI = "http://www.w3.org/2000/svg"
     const moreIcon = document.createElementNS(URI, 'svg');
     moreIcon.setAttribute("viewBox", "0 0 20 20");

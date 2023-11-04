@@ -1,4 +1,4 @@
-import {make} from './jeffQuery.js';
+import {make, query, toggleClass} from './jeffQuery.js';
 
 // For handling different kinds of input methods for the different quest groups
 function getStaticQuestHandler() {
@@ -36,7 +36,15 @@ function getWeeklyQuestHandler() {
         getTimeDisplay
     };
 }
+
+const QGUIHandlers = {
+    stat: getStaticQuestHandler,
+    daily: getDailyQuestHandler,
+    weekly: getWeeklyQuestHandler
+}
 // ...
+
+
 
 class QuestsDisplayer { // For purely converting user quest data into visual form
     // quest display dom items
@@ -57,7 +65,42 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         this.#completedQuestList.textContent = "";
     }
 
-    #generateQuestEntry(quest, index) {
+    #createDropdownIcon(){
+        const URI = "http://www.w3.org/2000/svg"
+        const moreIcon = document.createElementNS(URI, 'svg');
+        moreIcon.setAttribute("viewBox", "0 0 20 20");
+            const iconInternals = document.createElementNS(URI, 'path');
+            iconInternals.setAttribute("d", "M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z");
+            iconInternals.setAttribute("fill", "currentColor");
+            moreIcon.append(iconInternals);
+
+        return moreIcon;
+    }
+
+    #onQuestDeletion(questGroup, index) {
+        questGroup.removeQuest(index);
+        // _resetSelectedQuest();
+        // loadSelectedQuestGroup();
+        console.log(questGroup);
+    }
+
+    #toggleQuestOptions(optionsDisplay) {
+        const lastOptionsOpened = query('div.more-options:not(.hidden)');
+        if (lastOptionsOpened && lastOptionsOpened !== optionsDisplay) {
+            lastOptionsOpened.classList.add('hidden');
+        } 
+
+        toggleClass(optionsDisplay, 'hidden');
+        optionsDisplay.focus(); 
+    }
+
+    #closeOptionsByClickingElsewhere(entry, moreOptions) {
+        if (!entry.querySelector('.more:hover')){
+            moreOptions.classList.add('hidden');
+        }
+    }
+
+    #generateQuestEntry(quest, index, questGroup) {
         const entry = make('li'); 
         entry.dataset.index = index;
 
@@ -67,13 +110,67 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         entryButton.setAttribute("type", "button");
         entryButton.textContent = quest.name; 
 
+        const hasDueDate = quest.dueDate != null;
+        if (hasDueDate) {
+            const timeDisplay = QGUIHandlers[questGroup.QGType].getTimeDisplay(/*Argument here*/);
+            entry.append(timeDisplay);
+        }
+
+        const moreButton = make('button.more', entry);
+        const moreIcon = this.#createDropdownIcon();
+        moreButton.append(moreIcon);
+
+
+        const moreOptions = make('div.more-options.hidden', moreButton);
+        const deleteQuest = make('button.delete-option', moreOptions);
+        deleteQuest.textContent = 'Delete';
+        deleteQuest.addEventListener('click', this.#onQuestDeletion.bind(null, questGroup, index));
+
+        // deleteQuest.addEventListener('click', () => {
+        //     selectedQuestGroup.removeQuest(i);
+        //     _resetSelectedQuest();
+        //     loadSelectedQuestGroup();
+        // });
+
+        const editQuestName = make('button.edit-name-option', moreOptions);
+        editQuestName.textContent = 'Edit';
+
+        moreButton.addEventListener('click', this.#toggleQuestOptions.bind(null, moreOptions));
+        moreButton.addEventListener('blur', this.#closeOptionsByClickingElsewhere.bind(null, entry, moreOptions));
+
+        // editQuestName.addEventListener('click', () => {
+        //     entry.classList.add('hidden');
+
+        //     const editor = make('input.name-editor');
+        //     editor.setAttribute('type', 'text');
+        //     editor.value = quests[i].name;
+        //     entry.after(editor);
+
+        //     editor.focus();
+
+        //     const submitEdit = () => {
+        //         quests[i].name = editor.value;
+        //         entryButton.textContent = quests[i].name;
+        //         entry.classList.remove('hidden');
+                
+        //         editor.remove();
+        //     };
+        //     editor.addEventListener('focusout', submitEdit);
+
+        //     editor.addEventListener("keydown", (e) => {
+        //         if (e.keyCode === 13) submitEdit();
+        //     });
+        // });
+
         return entry;
     }
 
     displayQuestGroup(questGroup) {
         const quests = questGroup.quests; 
+        console.log(questGroup.QGType);
+
         for (let i = 0; i < quests.length; i++){
-            const entry = this.#generateQuestEntry(quests[i], i); 
+            const entry = this.#generateQuestEntry(quests[i], i, questGroup); 
 
             if (quests[i].isComplete) {
                 this.#completedQuestList.append(entry);
@@ -168,9 +265,9 @@ class DisplayManager {
     }
 
     #functionizeQGPickers() {
-        for (const [key, picker] of Object.entries(this.#QGPickers)) {
+        for (const [QGKey, picker] of Object.entries(this.#QGPickers)) {
             picker.addEventListener('click', () => {
-                const chosenQG = this.#user.questGroups[key];
+                const chosenQG = this.#user.questGroups[QGKey];
                 this.#tasksDisplayer.clearDisplayedTasks();
                 this.#questsDisplayer.clearDisplayedQuests();
                 this.#questsDisplayer.displayQuestGroup(chosenQG);

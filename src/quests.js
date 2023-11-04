@@ -214,6 +214,8 @@ function WeeklyTime(day, hour, minute){
 }
 
 class StaticQuestGroup extends QuestGroup {
+    QGType = "stat";
+
     makeQuest(name, tasks, due){
         const qst = new Quest(name, tasks, due);
         this.addQuest(qst);
@@ -221,6 +223,8 @@ class StaticQuestGroup extends QuestGroup {
 }
 
 class DailyQuestGroup extends QuestGroup {
+    QGType = "daily";
+
     makeQuest(name, tasks, time){
         const date = new Date();
         date.setHours(time.hour, time.minute, 0);
@@ -247,6 +251,7 @@ class DailyQuestGroup extends QuestGroup {
 }
 
 class WeeklyQuestGroup extends QuestGroup {
+    QGType = "weekly";
 
     makeQuest(name, tasks, weeklyTime) {
         const date = new Date();
