@@ -1,46 +1,87 @@
 import {make, query, insertAfter} from './jeffQuery.js';
+import { format, isToday, isThisWeek } from 'date-fns';
+
+function formatDate(date){
+    return format(date, 'MM.dd.yy');
+}
+
+function fixDate(input) {
+
+  let [year, month, day] = input.split('-');
+  console.log(month);
+
+  const date = new Date(year, month-1, day, 0, 0, 0);
+  return date;
+}
 
 // For handling different kinds of input methods for the different quest groups
 function getStaticHandler() {
-    const getDueLabel = () => {}; 
-    const processSubmission = () => {};
-    const getTimeDisplay = () => {}; 
+    const getDueInput = () => {
+        const questDueInput = make('input#get-quest-due'); 
+        questDueInput.setAttribute("type", "date");
+
+        return questDueInput;
+    }; 
+    const getLabelText = () => "Date: "; 
+    const getInputVals = () => {
+        const questName = query('#get-quest-name').value;
+
+        const dueInput = query('#get-quest-due');
+        const questDue = (Date.parse(fixDate(dueInput.value))) ? fixDate(dueInput.value) : null; // date parse can check if data is valid
+        
+        if (questName.length > 0) {
+            return [questName, questDue];
+        }
+        return [null, null];
+
+    };
+    const getTimeDisplay = (quest) => {
+        const dueDisplay = make('button.due');
+        dueDisplay.textContent = formatDate(quest.dueDate);
+        return dueDisplay;
+
+    }; 
 
     return {
-        getDueLabel,
-        processSubmission, 
+        getDueInput,
+        getLabelText,
+        getInputVals, 
         getTimeDisplay
     };
 }
 
 function getDailyHandler() {
-    const getDueLabel = () => {}; 
+    const getDueInput = () => {}; 
+    const getLabelText = () => "Time: "; 
     const processSubmission = () => {};
     const getTimeDisplay = () => {}; 
 
     return {
-        getDueLabel,
+        getDueInput,
+        getLabelText,
         processSubmission, 
         getTimeDisplay
     };
 }
 
 function getWeeklyHandler() {
-    const getDueLabel = () => {}; 
+    const getDueInput = () => {}; 
+    const getLabelText = () => "Day: "; 
     const processSubmission = () => {};
     const getTimeDisplay = () => {}; 
 
     return {
-        getDueLabel,
+        getDueInput,
+        getLabelText,
         processSubmission, 
         getTimeDisplay
     };
 }
 
 const QGUIHandlers = {
-    stat: getStaticHandler,
-    daily: getDailyHandler,
-    weekly: getWeeklyHandler
+    stat: getStaticHandler(),
+    daily: getDailyHandler(),
+    weekly: getWeeklyHandler()
 }
 // ...
 
@@ -157,7 +198,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
         const hasDueDate = quest.dueDate != null;
         if (hasDueDate) {
-            const timeDisplay = QGUIHandlers[questGroup.QGType].getTimeDisplay(/*Argument here*/);
+            const timeDisplay = QGUIHandlers[questGroup.QGType].getTimeDisplay(quest);
             entry.append(timeDisplay);
         }
 
@@ -350,6 +391,7 @@ class DisplayManager {
 
     // temp data
     #selectedQuestGroup;
+    #QGUIHandler;
 
     // stuff translating data into visuals in UI
     #tasksDisplayer; 
@@ -369,6 +411,7 @@ class DisplayManager {
     #questEnder; 
 
     // quest prompt stuff
+    #questAdder;
     #questPrompt; 
     #questPromptBody;
     #questNameLabel; 
@@ -379,12 +422,12 @@ class DisplayManager {
     constructor (user, nav, rightSection, leftSection) {
         this.#user = user;
 
-        this.#makeNavBar(nav); // create nav bar items
-
         this.#makeActionButtons(rightSection); // For buttons on the right section that adds tasks and completes quests
 
         this.#setupTaskDisplayer(rightSection); // tasks displayer must be made before quest displayer cause quest displayer references it 
         this.#setupQDerHandling(leftSection); // for quest display
+
+        this.#makeNavBar(nav); // create nav bar items
 
         document.addEventListener("quest completion changed", () => {
             this.#questsDisplayer.displayQuests(this.#selectedQuestGroup);
@@ -410,6 +453,10 @@ class DisplayManager {
         this.#functionizeQGPickers();
     }
 
+    #generateQuestPromptDueInput() {
+        this.#questDueLabel.textContent = this.#QGUIHandler.getLabelText();
+        this.#questDueLabel.append(this.#QGUIHandler.getDueInput())
+    }
     
     #functionizeQGPickers() {
         for (const [QGKey, picker] of Object.entries(this.#QGPickers)) {
@@ -422,8 +469,10 @@ class DisplayManager {
 
                 this.#tasksDisplayer.clearDisplayedTasks();
                 this.#selectedQuestGroup = chosenQG;
+                this.#QGUIHandler = QGUIHandlers[this.#selectedQuestGroup.QGType];
                 picker.classList.add("selected");
 
+                this.#generateQuestPromptDueInput();
 
                 this.#questsDisplayer.displayQuests(chosenQG);
             }); 
@@ -440,6 +489,13 @@ class DisplayManager {
         this.#questEnder.textContent = "End quest ×";
     }
 
+    #openQuestPrompt() {
+        this.classList.toggle("selected");
+        const lastPrompt = query(".quest-prompt");
+        lastPrompt.classList.toggle("activated")
+
+    }
+
     #setupQDerHandling(leftSection) {
         // sets up quest container can quest displayer object
         const questContainer = make('div.quest-container', leftSection);
@@ -447,16 +503,11 @@ class DisplayManager {
         const questList = make('ul.quests', questContainer);
         const completedQuestList = make('ul.completed.quests', questContainer);
 
-        const questAdder = make('button.quest-adder', leftSection);
-        questAdder.textContent = "+";
-        questAdder.addEventListener('click', () => {
-            questAdder.classList.toggle("selected");
-
-            const lastPrompt = query(".quest-prompt");
-            lastPrompt.classList.toggle("activated")
-        });
+        this.#questAdder = make('button.quest-adder', leftSection);
+        this.#questAdder.textContent = "+";
+        this.#questAdder.addEventListener('click', this.#openQuestPrompt);
         
-        this.#questsDisplayer = new QuestsDisplayer(questContainer, questList, completedQuestList, questAdder, this.#tasksDisplayer);
+        this.#questsDisplayer = new QuestsDisplayer(questContainer, questList, completedQuestList, this.#questAdder, this.#tasksDisplayer);
         // ...
 
         this.#makeQuestPrompt(questContainer); // For making UI box that lets user add new quests
@@ -489,8 +540,31 @@ class DisplayManager {
         this.#submitQuest.setAttribute("type", "reset");
         this.#submitQuest.textContent = "Ok";
 
-        make('div.quest-prompt-low', this.#questPrompt); // also just for decor
+        this.#submitQuest.addEventListener('click', () => {
+            const [questName, questDue] = this.#QGUIHandler.getInputVals();
+            if (questName != null) {
+                console.log({questName, questDue});
 
+                // toggleClass(questAdder, "selected");
+                this.#questAdder.classList.toggle("selected");
+                // toggleClass(questPrompt, "activated");
+                this.#questPrompt.classList.toggle("activated");
+
+                console.log(questDue);
+                if (questDue) {
+                    this.#selectedQuestGroup.makeQuest(questName, [], questDue);
+                } else {
+                    this.#selectedQuestGroup.makeQuest(questName, []);
+                }
+                // this.#selectedQuestGroup.makeQuest(questName, [], questDue);
+                this.#questsDisplayer.displayQuests(this.#selectedQuestGroup);
+                // DataDisplayer.loadSelectedQuestGroup();
+                // DataDisplayer.loadFirstQuest();
+            }
+
+        });
+
+        make('div.quest-prompt-low', this.#questPrompt); // also just for decor
     }
 
     #setupTaskDisplayer(rightSection) {
