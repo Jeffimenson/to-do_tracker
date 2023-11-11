@@ -1,6 +1,6 @@
 import {make, query, insertAfter} from './jeffQuery.js';
 import { format, isToday, isThisWeek } from 'date-fns';
-import { DailyTime } from './quests.js';
+import { DailyTime, Task } from './quests.js';
 
 function formatDate(date){
     return format(date, 'MM.dd.yy');
@@ -12,7 +12,6 @@ function formatDateToTime(date) {
 
 function fixDate(input) {
   let [year, month, day] = input.split('-');
-  console.log(month);
 
   const date = new Date(year, month-1, day, 0, 0, 0);
   return date;
@@ -131,7 +130,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
     #completedQuestList; 
     #questAdder;
     
-    #selectedQuestIndex;
+    selectedQuestIndex;
 
     #tasksDisplayer; // reference to task displayer from main displaymanager
 
@@ -154,7 +153,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         questGroup.removeQuest(index);
         // _resetSelectedQuest();
         this.clearDisplayedQuests(); 
-        this.#selectedQuestIndex = 0;
+        this.selectedQuestIndex = 0;
         this.displayQuests(questGroup); 
 
     }
@@ -206,7 +205,8 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
     #selectQuest(quest, entryButton, index) {
         this.#setStylingAsSelected(entryButton);
         this.#tasksDisplayer.displayTasks(quest);
-        this.#selectedQuestIndex = index; 
+        this.selectedQuestIndex = index; 
+        console.log(this.selectedQuestIndex)
     }
 
     #generateQuestEntry(quest, index, questGroup) {
@@ -256,7 +256,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         const entries = [];
         for (let i = 0; i < quests.length; i++){
             const entry = this.#generateQuestEntry(quests[i], i, questGroup); 
-            if (this.#selectedQuestIndex === i) {
+            if (this.selectedQuestIndex === i) {
                 this.#selectQuest(quests[i], entry.querySelector('div.quest-select'), i);
                 selectedAQuest = true; 
             }
@@ -307,6 +307,58 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         moreOptions.focus(); 
     }
 
+    #closeOptionsByClickingElsewhere(entry, moreOptions) {
+        if (!entry.querySelector('.more:hover')){
+            moreOptions.classList.add('hidden');
+        }
+    }
+
+    #activateEditMode(entry, entryLabelText, task) {
+        entry.classList.add('hidden');
+
+        const editor = make('input.name-editor');
+        editor.setAttribute('type', 'text');
+        editor.value = task.description;
+        insertAfter(entry, editor);
+
+        editor.focus();
+
+        const submitEdit = () => {
+            task.description = editor.value;
+            entryLabelText.textContent = task.description;
+            entry.classList.remove('hidden');
+            
+            editor.remove();
+        };
+
+        editor.addEventListener('focusout', submitEdit);
+        editor.addEventListener('keydown', (e) => { if (e.keyCode === 13) submitEdit() });
+    }
+
+    #findPlaceToInsertTask(entry, nextList) {
+        setTimeout(
+            () => {
+                const entries = nextList.children;
+                if (entries.length > 0){
+                    for (let i = 0; i < entries.length; i++) {
+                        const currentIndex = entries[i].dataset.index;
+                        const thisIndex = entry.dataset.index;
+
+                        if (currentIndex > thisIndex) {
+                            nextList.insertBefore(entry, entries[i]);
+                            return;
+                        }
+                    }
+                    nextList.append(entry);
+                } else {
+                    nextList.append(entry);
+                }
+
+            }, 
+            200
+        );
+    }
+
     #generateTaskEntry(quest, taskIndex) {
         const task = quest.tasks[taskIndex];
 
@@ -328,7 +380,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         
         const moreOptions = make('div.more-options.hidden', moreButton);
         moreOptions.setAttribute('tabindex', 0);
-        moreOptions.addEventListener('blur', this.#toggleMoreTaskOptions.bind(this, moreOptions));
+        moreOptions.addEventListener('blur', this.#closeOptionsByClickingElsewhere.bind(this, entry, moreOptions));
 
         moreButton.addEventListener('click', this.#toggleMoreTaskOptions.bind(this, moreOptions));
 
@@ -338,14 +390,14 @@ class TasksDisplayer { // For purely converting user quest data into visual form
 
         const editName = make('button.edit-name-option', moreOptions);
         editName.textContent = 'Edit';
-        // editName.addEventListener('click', _onEditTaskName);
-
+        editName.addEventListener('click', this.#activateEditMode.bind(this, entry, labelText, task));
 
         entryInput.addEventListener("change", () => {
             const checked = entryInput.checked;
             let questStateChanged = false; 
 
-            let nextList;
+            // this part checks if quest should move sections after task is completed
+            let nextList; 
             if (checked) {
                 task.complete();
                 nextList = this.#completedTaskList;
@@ -359,7 +411,6 @@ class TasksDisplayer { // For purely converting user quest data into visual form
                 task.resetCompletion();
                 nextList = this.#taskList;
                 
-                
                 if (quest.isComplete){
                     quest.resetCompletion();
                     document.dispatchEvent(questCompletionChanged);
@@ -368,27 +419,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
             }
 
             if (!questStateChanged) {
-                setTimeout(
-                    () => {
-                        const entries = nextList.children;
-                        if (entries.length > 0){
-                            for (let i = 0; i < entries.length; i++) {
-                                const currentIndex = entries[i].dataset.index;
-                                const thisIndex = entry.dataset.index;
-
-                                if (currentIndex > thisIndex) {
-                                    nextList.insertBefore(entry, entries[i]);
-                                    return;
-                                }
-                            }
-                            nextList.append(entry);
-                        } else {
-                            nextList.append(entry);
-                        }
-
-                    }, 
-                    200
-                );
+                this.#findPlaceToInsertTask(entry, nextList); 
             }
         });
 
@@ -503,11 +534,45 @@ class DisplayManager {
         }
     }
 
+    #activateTaskAdder() {
+        if (this.#questsDisplayer.selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
+            const taskList = query("ul.tasks");
+            const wrapperForm = make("form#task-adder-form", taskList);
+            wrapperForm.setAttribute("onsubmit", "return false"); // Might have to change this if I actually make this submit somewhere
+
+            const newTaskInput = make("input#create-new-task", wrapperForm);
+            newTaskInput.setAttribute("placeholder", "New task");
+            newTaskInput.setAttribute("type", "text");
+            newTaskInput.addEventListener("focusout", () => {
+                wrapperForm.remove();
+            });
+
+            const submit = make("button", wrapperForm);
+            submit.textContent = "submit";
+            const submitTaskFunc = () => {
+                const task = new Task(newTaskInput.value, false);
+                this.#selectedQuestGroup.quests[this.#questsDisplayer.selectedQuestIndex].addTask(task);
+                newTaskInput.blur(); //Without this, auto-suggest pop up still is there on firefox
+                this.#questsDisplayer.displayQuests(this.#selectedQuestGroup);
+            };
+            submit.addEventListener("pointerdown", submitTaskFunc);
+
+            newTaskInput.addEventListener("keyup", (e) => {
+                if (e.keyCode === 13){
+                    submitTaskFunc();
+                }
+            });
+
+            newTaskInput.focus();
+        }
+
+    }
 
     #makeActionButtons(rightSection) {
         this.#actionsContainer = make('div.actions-container', rightSection);  
         this.#taskAdder = make('button.task-adder', this.#actionsContainer);
         this.#taskAdder.textContent = "Add task +";
+        this.#taskAdder.addEventListener('click', this.#activateTaskAdder.bind(this)); 
 
         this.#questEnder = make('button.quest-ender', this.#actionsContainer);
         this.#questEnder.textContent = "End quest ×";
@@ -567,14 +632,12 @@ class DisplayManager {
         this.#submitQuest.addEventListener('click', () => {
             const [questName, questDue] = this.#QGUIHandler.getInputVals();
             if (questName != null) {
-                console.log({questName, questDue});
 
                 // toggleClass(questAdder, "selected");
                 this.#questAdder.classList.toggle("selected");
                 // toggleClass(questPrompt, "activated");
                 this.#questPrompt.classList.toggle("activated");
 
-                console.log(questDue);
                 if (questDue) {
                     this.#selectedQuestGroup.makeQuest(questName, [], questDue);
                 } else {
