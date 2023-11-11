@@ -22,7 +22,6 @@ function make(selector, parent){
 
         if (subStr.length === 0){
             throw console.error('Usage error: Tried to use two symbols for class and/or id in a row.');
-            return;
         }
         const sym = selector.at(lastInd);
         if (sym === '.'){
@@ -31,7 +30,6 @@ function make(selector, parent){
             id = subStr;
         } else {
             throw console.error("Argument error: elements can't have multiple ids");
-            return;
         }
 
         lastInd = ind;
