@@ -1,12 +1,16 @@
 import {make, query, insertAfter} from './jeffQuery.js';
 import { format, isToday, isThisWeek } from 'date-fns';
+import { DailyTime } from './quests.js';
 
 function formatDate(date){
     return format(date, 'MM.dd.yy');
 }
 
-function fixDate(input) {
+function formatDateToTime(date) {
+    return format(date, 'hh:mm aa');
+}
 
+function fixDate(input) {
   let [year, month, day] = input.split('-');
   console.log(month);
 
@@ -51,15 +55,35 @@ function getStaticHandler() {
 }
 
 function getDailyHandler() {
-    const getDueInput = () => {}; 
+    const getDueInput = () => {
+        const questDueInput = make('input#get-quest-due'); 
+        questDueInput.setAttribute("type", "time");
+
+        return questDueInput;
+    }; 
     const getLabelText = () => "Time: "; 
-    const processSubmission = () => {};
-    const getTimeDisplay = () => {}; 
+    const getInputVals = () => {
+        const questName = query('#get-quest-name').value;
+
+        const dueInput = query('#get-quest-due');
+        const [hour, minute] = dueInput.value.split(':');
+        const questDue = DailyTime(hour, minute);
+
+        if (questName.length > 0) {
+            return [questName, questDue];
+        }
+        return [null, null];
+    };
+    const getTimeDisplay = (quest) => {
+        const dueDisplay = make('button.due');
+        dueDisplay.textContent = formatDateToTime(quest.dueDate);
+        return dueDisplay;
+    }; 
 
     return {
         getDueInput,
         getLabelText,
-        processSubmission, 
+        getInputVals, 
         getTimeDisplay
     };
 }
@@ -67,13 +91,13 @@ function getDailyHandler() {
 function getWeeklyHandler() {
     const getDueInput = () => {}; 
     const getLabelText = () => "Day: "; 
-    const processSubmission = () => {};
+    const getInputVals = () => {};
     const getTimeDisplay = () => {}; 
 
     return {
         getDueInput,
         getLabelText,
-        processSubmission, 
+        getInputVals, 
         getTimeDisplay
     };
 }
