@@ -1,6 +1,6 @@
 import {make, query, insertAfter} from './jeffQuery.js';
 import { format, isToday, isThisWeek } from 'date-fns';
-import { DailyTime, Task } from './quests.js';
+import { DailyTime, Task, Day, WeeklyTime} from './quests.js';
 
 function formatDate(date){
     return format(date, 'MM.dd.yy');
@@ -88,10 +88,67 @@ function getDailyHandler() {
 }
 
 function getWeeklyHandler() {
-    const getDueInput = () => {}; 
+    const _dayIndices = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    let _selectedDay = null;
+
+    const _makeDayGetter = (dayName, container) => {
+        const but = make('button.due-day-getter', container);
+        but.textContent = dayName;
+        but.setAttribute('type', 'button');
+        but.dataset.dayId = Day[dayName];
+
+        but.addEventListener('click', () => {
+            _selectedDay = Day[dayName];
+
+            const lastSelect = query('.due-day-getter.selected');
+            if (lastSelect) lastSelect.classList.remove('selected');
+            but.classList.add('selected');
+        });
+    }
+
+    const getDueInput = () => {
+        const inputContainer = make('div.due-container');
+        for (const [key, val] of Object.entries(Day)) {
+            _makeDayGetter.call(this, key, inputContainer);
+        }
+
+        const questDueTimeInput = make('input#get-quest-due', inputContainer); 
+        questDueTimeInput.setAttribute("type", "time");
+
+        return inputContainer;
+    }; 
     const getLabelText = () => "Day: "; 
-    const getInputVals = () => {};
-    const getTimeDisplay = () => {}; 
+    const getInputVals = () => {
+        const questName = query('#get-quest-name').value;
+
+        const timeInput = query("#get-quest-due[type='time'");
+        let [hour, minute] = timeInput.value.split(':');
+        if (timeInput.value.length === 0) {
+            hour = 0;
+            minute = 0;
+        }
+        // let [hour, minute] = [0, 0];
+
+        const sDay = _selectedDay;
+        const questDue = WeeklyTime(sDay, +hour, +minute);
+
+        if (questName.length > 0) {
+            _selectedDay = null;
+            const lastSelect = query('.due-day-getter.selected');
+            if (lastSelect) lastSelect.classList.remove('selected');
+            return [questName, questDue];
+        }
+        return [null, null];
+
+    };
+    const getTimeDisplay = (quest) => {
+        const dueDisplay = make('button.due');
+        const day = _dayIndices[quest.dueDate.getDay()];
+        const time = formatDateToTime(quest.dueDate);
+
+        dueDisplay.textContent = `${day} ${time}`;
+        return dueDisplay;
+    }; 
 
     return {
         getDueInput,
@@ -206,7 +263,6 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         this.#setStylingAsSelected(entryButton);
         this.#tasksDisplayer.displayTasks(quest);
         this.selectedQuestIndex = index; 
-        console.log(this.selectedQuestIndex)
     }
 
     #generateQuestEntry(quest, index, questGroup) {
