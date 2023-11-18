@@ -20,16 +20,16 @@ function fixDate(input) {
 // For handling different kinds of input methods for the different quest groups
 function getStaticHandler() {
     const getDueInput = () => {
-        const questDueInput = make('input#get-quest-due'); 
+        const questDueInput = make('input.get-quest-due'); 
         questDueInput.setAttribute("type", "date");
 
         return questDueInput;
     }; 
     const getLabelText = () => "Date: "; 
     const getInputVals = () => {
-        const questName = query('#get-quest-name').value;
+        const questName = query('.quest-prompt .get-quest-name').value;
 
-        const dueInput = query('#get-quest-due');
+        const dueInput = query('.quest-prompt .get-quest-due');
         const questDue = (Date.parse(fixDate(dueInput.value))) ? fixDate(dueInput.value) : null; // date parse can check if data is valid
         
         if (questName.length > 0) {
@@ -38,33 +38,40 @@ function getStaticHandler() {
         return [null, null];
 
     };
-    const getTimeDisplay = (quest) => {
-        const dueDisplay = make('button.due');
-        dueDisplay.textContent = formatDate(quest.dueDate);
-        return dueDisplay;
+    const getDueEditorVals = (dueEditor) => {
+        const questDue = (Date.parse(fixDate(dueEditor.value))) ? fixDate(dueEditor.value) : null; // date parse can check if data is valid
 
+        return questDue;
+    }
+    const getTimeDisplayText = (quest) => {
+        // const dueDisplay = make('button.due');
+        // dueDisplay.textContent = formatDate(quest.dueDate);
+        // return dueDisplay;
+
+        return formatDate(quest.dueDate);
     }; 
 
     return {
         getDueInput,
         getLabelText,
         getInputVals, 
-        getTimeDisplay
+        getTimeDisplayText, 
+        getDueEditorVals
     };
 }
 
 function getDailyHandler() {
     const getDueInput = () => {
-        const questDueInput = make('input#get-quest-due'); 
+        const questDueInput = make('input.get-quest-due'); 
         questDueInput.setAttribute("type", "time");
 
         return questDueInput;
     }; 
     const getLabelText = () => "Time: "; 
     const getInputVals = () => {
-        const questName = query('#get-quest-name').value;
+        const questName = query('.quest-prompt .get-quest-name').value;
 
-        const dueInput = query('#get-quest-due');
+        const dueInput = query('.quest-prompt .get-quest-due');
         const [hour, minute] = dueInput.value.split(':');
         const questDue = DailyTime(hour, minute);
 
@@ -73,17 +80,29 @@ function getDailyHandler() {
         }
         return [null, null];
     };
-    const getTimeDisplay = (quest) => {
-        const dueDisplay = make('button.due');
-        dueDisplay.textContent = formatDateToTime(quest.dueDate);
-        return dueDisplay;
+    const getDueEditorVals = (dueEditor) => {
+        const [hour, minute] = dueEditor.value.split(':');
+        const questDue = DailyTime(hour, minute);
+        const date = new Date();
+        date.setHours(questDue.hour, questDue.minute, 0);
+
+        return date;
+
+    }
+    const getTimeDisplayText = (quest) => {
+        // const dueDisplay = make('button.due');
+        // dueDisplay.textContent = formatDateToTime(quest.dueDate);
+        // return dueDisplay;
+        console.log(quest.dueDate);
+        return formatDateToTime(quest.dueDate);
     }; 
 
     return {
         getDueInput,
         getLabelText,
         getInputVals, 
-        getTimeDisplay
+        getDueEditorVals,
+        getTimeDisplayText
     };
 }
 
@@ -100,7 +119,7 @@ function getWeeklyHandler() {
         but.addEventListener('click', () => {
             _selectedDay = Day[dayName];
 
-            const lastSelect = query('.due-day-getter.selected');
+            const lastSelect = query('.quest-prompt .due-day-getter.selected');
             if (lastSelect) lastSelect.classList.remove('selected');
             but.classList.add('selected');
         });
@@ -112,16 +131,16 @@ function getWeeklyHandler() {
             _makeDayGetter.call(this, key, inputContainer);
         }
 
-        const questDueTimeInput = make('input#get-quest-due', inputContainer); 
+        const questDueTimeInput = make('input.get-quest-due', inputContainer); 
         questDueTimeInput.setAttribute("type", "time");
 
         return inputContainer;
     }; 
     const getLabelText = () => "Day: "; 
     const getInputVals = () => {
-        const questName = query('#get-quest-name').value;
+        const questName = query('.quest-prompt .get-quest-name').value;
 
-        const timeInput = query("#get-quest-due[type='time'");
+        const timeInput = query(".quest-prompt .get-quest-due[type='time']");
         let [hour, minute] = timeInput.value.split(':');
         if (timeInput.value.length === 0) {
             hour = 0;
@@ -134,27 +153,25 @@ function getWeeklyHandler() {
 
         if (questName.length > 0) {
             _selectedDay = null;
-            const lastSelect = query('.due-day-getter.selected');
+            const lastSelect = query('.quest-prompt .due-day-getter.selected');
             if (lastSelect) lastSelect.classList.remove('selected');
             return [questName, questDue];
         }
         return [null, null];
 
     };
-    const getTimeDisplay = (quest) => {
-        const dueDisplay = make('button.due');
+    const getTimeDisplayText = (quest) => {
         const day = _dayIndices[quest.dueDate.getDay()];
         const time = formatDateToTime(quest.dueDate);
 
-        dueDisplay.textContent = `${day} ${time}`;
-        return dueDisplay;
+        return `${day} ${time}`;
     }; 
 
     return {
         getDueInput,
         getLabelText,
         getInputVals, 
-        getTimeDisplay
+        getTimeDisplayText
     };
 }
 
@@ -215,25 +232,39 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
     }
 
-    #activateEditMode(entry, entryButton, quest) {
+    #activateEditMode(entry, entryButton, quest, QGType, timeDisplay) {
         entry.classList.add('hidden');
 
-        const editor = make('input.name-editor');
+        const holder = make('div.editor-holder'); 
+        const editor = make('input.name-editor', holder);
         editor.setAttribute('type', 'text');
         editor.value = quest.name;
-        insertAfter(entry, editor);
+        insertAfter(entry, holder);
 
         editor.focus();
+
+        const editQuestDue = QGUIHandlers[QGType].getDueInput();
+        holder.append(editQuestDue);
+
+        const editsubmitter = make('button.edit-submitter', holder);
+        editsubmitter.textContent = '>>';
 
         const submitEdit = () => {
             quest.name = editor.value;
             entryButton.textContent = quest.name;
             entry.classList.remove('hidden');
             
-            editor.remove();
+            const newDue = QGUIHandlers[QGType].getDueEditorVals(editQuestDue);
+            if (newDue) {
+                quest.dueDate = newDue;
+                timeDisplay.textContent = QGUIHandlers[QGType].getTimeDisplayText(quest);
+            }
+
+            holder.remove();
         };
 
-        editor.addEventListener('focusout', submitEdit);
+        // editor.addEventListener('focusout', submitEdit);
+        editsubmitter.addEventListener('click', submitEdit);
         editor.addEventListener('keydown', (e) => { if (e.keyCode === 13) submitEdit() });
     }
 
@@ -277,9 +308,10 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         entryButton.addEventListener('click', this.#selectQuest.bind(this, quest, entryButton, index));
 
         const hasDueDate = quest.dueDate != null;
+        const timeDisplay = make('button.due');
+        entry.append(timeDisplay);
         if (hasDueDate) {
-            const timeDisplay = QGUIHandlers[questGroup.QGType].getTimeDisplay(quest);
-            entry.append(timeDisplay);
+            timeDisplay.textContent = QGUIHandlers[questGroup.QGType].getTimeDisplayText(quest);
         }
 
         const moreButton = make('button.more', entry);
@@ -294,7 +326,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
         const editQuestName = make('button.edit-name-option', moreOptions);
         editQuestName.textContent = 'Edit';
-        editQuestName.addEventListener('click', this.#activateEditMode.bind(null, entry, entryButton, quest));
+        editQuestName.addEventListener('click', this.#activateEditMode.bind(this, entry, entryButton, quest, questGroup.QGType, timeDisplay));
 
         moreButton.addEventListener('click', this.#toggleQuestOptions.bind(null, moreOptions));
         moreButton.addEventListener('blur', this.#closeOptionsByClickingElsewhere.bind(null, entry, moreOptions));
@@ -673,7 +705,7 @@ class DisplayManager {
         this.#questNameLabel.setAttribute("for", "get-quest-name");
         this.#questNameLabel.textContent = "Quest name: ";
 
-        this.#questNameInput = make('input#get-quest-name', this.#questNameLabel);
+        this.#questNameInput = make('input.get-quest-name', this.#questNameLabel);
         this.#questNameInput.setAttribute("type", "text");
         this.#questNameInput.setAttribute("placeholder", "Name here");
 

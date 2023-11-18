@@ -242,7 +242,7 @@ section.left .quest-container {
     gap: 20px;
 }
 
-.quest-prompt-body label, #get-quest-name {
+.quest-prompt-body label, .get-quest-name {
     display: inline-block;
     margin-right: 15px;
 }
@@ -255,7 +255,7 @@ section.left .quest-container {
     padding: 4px 6px;
 }
 
-#get-quest-due {
+.get-quest-due {
     display: inline;
 }
 
@@ -415,10 +415,35 @@ button.more:hover svg {
     color: var(--pip-green);
 }
 
-.name-editor {
+.name-editor { /*will have padding when not in editor-holder*/
     padding: 10px 45px;
-    border: 2px solid transparent
-    
+    border: 2px solid var(--pip-darkened);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.editor-holder {
+    padding: 10px 45px;
+    border: 2px solid var(--pip-darkened);
+    position: relative;
+}
+.editor-holder .name-editor {
+    padding: 0px 0px;
+    width: auto;
+    padding-bottom: 10px;
+    border: 2px solid transparent;
+}
+
+.editor-holder .get-quest-due, .editor-holder .due-container {
+   /* width: 60px;  */
+   font-size: 0.7rem;
+}
+
+.edit-submitter {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 0.7rem;
 }
 
 
