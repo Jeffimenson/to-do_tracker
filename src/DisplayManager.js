@@ -75,12 +75,15 @@ function getDailyHandler() {
         const [hour, minute] = dueInput.value.split(':');
         const questDue = DailyTime(hour, minute);
 
-        if (questName.length > 0) {
+        if (questName.length > 0 && dueInput.value.length > 0) {
             return [questName, questDue];
         }
         return [null, null];
     };
     const getDueEditorVals = (dueEditor) => {
+        if (dueEditor.value.length === 0) {
+            return null;
+        }
         const [hour, minute] = dueEditor.value.split(':');
         const questDue = DailyTime(hour, minute);
         const date = new Date();
@@ -108,7 +111,6 @@ function getDailyHandler() {
 
 function getWeeklyHandler() {
     const _dayIndices = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-    let _selectedDay = null;
 
     const _makeDayGetter = (dayName, container) => {
         const but = make('button.due-day-getter', container);
@@ -117,10 +119,15 @@ function getWeeklyHandler() {
         but.dataset.dayId = Day[dayName];
 
         but.addEventListener('click', () => {
-            _selectedDay = Day[dayName];
-
-            const lastSelect = query('.quest-prompt .due-day-getter.selected');
-            if (lastSelect) lastSelect.classList.remove('selected');
+            const lastSelect = query('.due-day-getter.selected', container);
+            if (lastSelect) {
+                lastSelect.classList.remove('selected');
+                if (lastSelect.dataset.dayId === but.dataset.dayId) {
+                    container.dataset.selectedDay = ""; 
+                    return;
+                }
+            }
+            container.dataset.selectedDay = Day[dayName];
             but.classList.add('selected');
         });
     }
@@ -140,6 +147,7 @@ function getWeeklyHandler() {
     const getInputVals = () => {
         const questName = query('.quest-prompt .get-quest-name').value;
 
+        const weekInput = query(".quest-prompt .due-container");
         const timeInput = query(".quest-prompt .get-quest-due[type='time']");
         let [hour, minute] = timeInput.value.split(':');
         if (timeInput.value.length === 0) {
@@ -148,11 +156,11 @@ function getWeeklyHandler() {
         }
         // let [hour, minute] = [0, 0];
 
-        const sDay = _selectedDay;
-        const questDue = WeeklyTime(sDay, +hour, +minute);
+        const selectedDay = weekInput.dataset.selectedDay;
+        const questDue = WeeklyTime(selectedDay, +hour, +minute);
 
         if (questName.length > 0) {
-            _selectedDay = null;
+            weekInput.dataset.selectedDay = "";
             const lastSelect = query('.quest-prompt .due-day-getter.selected');
             if (lastSelect) lastSelect.classList.remove('selected');
             return [questName, questDue];
@@ -160,6 +168,27 @@ function getWeeklyHandler() {
         return [null, null];
 
     };
+    const getDueEditorVals = (dueEditor) => {
+        const timeInput = query(".get-quest-due[type='time']", dueEditor);
+        let [hour, minute] = timeInput.value.split(':');
+        if (timeInput.value.length === 0) {
+            hour = 0;
+            minute = 0;
+        }
+        // let [hour, minute] = [0, 0];
+
+        const questDue = WeeklyTime(dueEditor.dataset.selectedDay, +hour, +minute);
+        const date = new Date();
+        const dayDiff = date.getDay() - questDue.day; 
+
+        const dayOfMonth = date.getDate() - dayDiff; 
+        date.setDate(dayOfMonth);
+
+        date.setHours(questDue.hour, questDue.minute, 0);
+
+        return date;
+
+    }
     const getTimeDisplayText = (quest) => {
         const day = _dayIndices[quest.dueDate.getDay()];
         const time = formatDateToTime(quest.dueDate);
@@ -171,7 +200,8 @@ function getWeeklyHandler() {
         getDueInput,
         getLabelText,
         getInputVals, 
-        getTimeDisplayText
+        getTimeDisplayText,
+        getDueEditorVals
     };
 }
 
