@@ -27,14 +27,18 @@ function getStaticHandler() {
     }; 
     const getLabelText = () => "Date: "; 
     const getInputVals = () => {
-        const questName = query('.quest-prompt .get-quest-name').value;
+        const submitButton = query('.quest-prompt #submit-quest');
+        const questNameInput = query('.quest-prompt .get-quest-name');
+        const questName = questNameInput.value;
 
         const dueInput = query('.quest-prompt .get-quest-due');
         const questDue = (Date.parse(fixDate(dueInput.value))) ? fixDate(dueInput.value) : null; // date parse can check if data is valid
         
         if (questName.length > 0) {
+            submitButton.setAttribute("type", "reset");
             return [questName, questDue];
         }
+        submitButton.setAttribute("type", "button");
         return [null, null];
 
     };
@@ -69,15 +73,19 @@ function getDailyHandler() {
     }; 
     const getLabelText = () => "Time: "; 
     const getInputVals = () => {
-        const questName = query('.quest-prompt .get-quest-name').value;
+        const submitButton = query('.quest-prompt #submit-quest');
+        const questNameInput = query('.quest-prompt .get-quest-name');
+        const questName = questNameInput.value;
 
         const dueInput = query('.quest-prompt .get-quest-due');
         const [hour, minute] = dueInput.value.split(':');
         const questDue = DailyTime(hour, minute);
 
         if (questName.length > 0 && dueInput.value.length > 0) {
+            submitButton.setAttribute("type", "reset");
             return [questName, questDue];
         }
+        submitButton.setAttribute("type", "button");
         return [null, null];
     };
     const getDueEditorVals = (dueEditor) => {
@@ -113,6 +121,7 @@ function getWeeklyHandler() {
     const _dayIndices = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
     const _makeDayGetter = (dayName, container) => {
+        container.dataset.selectedDay = ""; 
         const but = make('button.due-day-getter', container);
         but.textContent = dayName;
         but.setAttribute('type', 'button');
@@ -145,26 +154,31 @@ function getWeeklyHandler() {
     }; 
     const getLabelText = () => "Day: "; 
     const getInputVals = () => {
-        const questName = query('.quest-prompt .get-quest-name').value;
+        const submitButton = query('.quest-prompt #submit-quest');
+        const questNameInput = query('.quest-prompt .get-quest-name');
+        const questName = questNameInput.value;
 
         const weekInput = query(".quest-prompt .due-container");
         const timeInput = query(".quest-prompt .get-quest-due[type='time']");
-        let [hour, minute] = timeInput.value.split(':');
-        if (timeInput.value.length === 0) {
+        let hour, minute;
+        if (timeInput.value.length > 0) {
+            [hour, minute] = timeInput.value.split(':');
+        } else {
             hour = 0;
             minute = 0;
-        }
-        // let [hour, minute] = [0, 0];
-
+        } 
         const selectedDay = weekInput.dataset.selectedDay;
+        console.log(selectedDay);
         const questDue = WeeklyTime(selectedDay, +hour, +minute);
 
-        if (questName.length > 0) {
+        if (questName.length > 0 && selectedDay !== "") {
+            submitButton.setAttribute("type", "reset");
             weekInput.dataset.selectedDay = "";
             const lastSelect = query('.quest-prompt .due-day-getter.selected');
             if (lastSelect) lastSelect.classList.remove('selected');
             return [questName, questDue];
         }
+        submitButton.setAttribute("type", "button");
         return [null, null];
 
     };
@@ -744,7 +758,7 @@ class DisplayManager {
         this.#questDueLabel.textContent = "Due: ";
 
         this.#submitQuest = make('button#submit-quest', this.#questPromptBody);
-        this.#submitQuest.setAttribute("type", "reset");
+        this.#submitQuest.setAttribute("type", "submit");
         this.#submitQuest.textContent = "Ok";
 
         this.#submitQuest.addEventListener('click', () => {
