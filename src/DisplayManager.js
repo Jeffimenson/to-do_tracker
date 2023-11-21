@@ -340,6 +340,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         this.selectedQuestIndex = index; 
     }
 
+    #currDraggedIndex;
     #generateQuestEntry(quest, index, questGroup) {
         const entry = make('li'); 
         entry.dataset.index = index;
@@ -374,6 +375,23 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
         moreButton.addEventListener('click', this.#toggleQuestOptions.bind(null, moreOptions));
         moreButton.addEventListener('blur', this.#closeOptionsByClickingElsewhere.bind(null, entry, moreOptions));
+
+        // entry drag and drop code (works for completed quests too cause I think completed entries get moved to the reg quests list but are instantly sent back to completed list)
+        entry.setAttribute("draggable", true);
+        entry.addEventListener("dragenter", () => {
+            if (this.#currDraggedIndex !== index) {
+                questGroup.moveQuest(this.#currDraggedIndex, index);
+                this.selectedQuestIndex = index;
+                this.displayQuests(questGroup);
+
+                const newParent = query(`.quests [data-index="${index}"`); // change this later to display selectedQuestIndex quest instead of currently dragged quest
+                const newButton = query('.quest-select', newParent);
+                this.#currDraggedIndex = index; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
+            }
+        });
+        entry.addEventListener("dragstart", () => {
+            this.#currDraggedIndex = index;
+        })
 
         return entry;
     }
@@ -491,6 +509,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         );
     }
 
+    #currDraggedIndex;
     #generateTaskEntry(quest, taskIndex) {
         const task = quest.tasks[taskIndex];
 
@@ -554,6 +573,22 @@ class TasksDisplayer { // For purely converting user quest data into visual form
                 this.#findPlaceToInsertTask(entry, nextList); 
             }
         });
+
+        // entry drag and drop code (works for completed quests too cause I think completed entries get moved to the reg quests list but are instantly sent back to completed list)
+        entry.setAttribute("draggable", true);
+        entry.addEventListener("dragenter", () => {
+            if (this.#currDraggedIndex !== taskIndex) {
+                quest.moveTask(this.#currDraggedIndex, taskIndex);
+                this.displayTasks(quest);
+
+                const newParent = query(`.tasks [data-index="${taskIndex}"`); // change this later to display selectedQuestIndex quest instead of currently dragged quest
+                // const newButton = query('.quest-select', newParent);
+                this.#currDraggedIndex = taskIndex; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
+            }
+        });
+        entry.addEventListener("dragstart", () => {
+            this.#currDraggedIndex = taskIndex;
+        })
 
         return entry;
 

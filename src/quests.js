@@ -104,6 +104,12 @@ class Quest {
         this.#tasks.push(task);
     }
 
+    moveTask(fromIndex, toIndex){
+        const task = this.#tasks[fromIndex];
+        this.removeTask(fromIndex);
+        this.#tasks.splice(toIndex, 0, task);
+    }
+
     completeTask(index){
         const task = this.#tasks[index];
         task.trackCompletionDate();
@@ -156,7 +162,7 @@ class QuestGroup {
 
     moveQuest(fromIndex, toIndex){
         const quest = this.#quests[fromIndex];
-        this.removeQuest(fromIndex, 1);
+        this.removeQuest(fromIndex);
         this.#quests.splice(toIndex, 0, quest);
     }
 
