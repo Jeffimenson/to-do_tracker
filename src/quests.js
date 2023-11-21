@@ -101,6 +101,9 @@ class Quest {
     } 
 
     addTask(task){
+        if (this.shouldBeComplete()) {
+            this.resetCompletion();
+        }
         this.#tasks.push(task);
     }
 
@@ -121,7 +124,7 @@ class Quest {
     }
     
     shouldBeComplete(){
-        return this.#tasks.length === 0 && this.completedTasks.length > 0;
+        return this.#tasks.length === this.completedTasks.length;
     }
 
     trackCompletionDate(){
@@ -178,7 +181,7 @@ class QuestGroup {
 
     completeQuest(index){
         const quest = this.#quests[index];
-        quest.trackCompletionDate();
+        quest.complete();
     }
     
     cleanCompleted(){
@@ -249,7 +252,7 @@ class DailyQuestGroup extends QuestGroup {
             currQuest.dueDate = newTime;
 
             if (currQuest.completionDate !== null) {
-                currQuest.resetCompletionDate();
+                currQuest.resetCompletion();
                 currQuest.resetTasks();
             }
         }
@@ -287,7 +290,7 @@ class WeeklyQuestGroup extends QuestGroup {
 
 
             if (currQuest.completionDate !== null) {
-                currQuest.resetCompletionDate();
+                currQuest.resetCompletion();
                 currQuest.resetTasks();
             }
             

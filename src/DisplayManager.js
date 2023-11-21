@@ -384,8 +384,6 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
                 this.selectedQuestIndex = index;
                 this.displayQuests(questGroup);
 
-                const newParent = query(`.quests [data-index="${index}"`); // change this later to display selectedQuestIndex quest instead of currently dragged quest
-                const newButton = query('.quest-select', newParent);
                 this.#currDraggedIndex = index; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
             }
         });
@@ -581,8 +579,6 @@ class TasksDisplayer { // For purely converting user quest data into visual form
                 quest.moveTask(this.#currDraggedIndex, taskIndex);
                 this.displayTasks(quest);
 
-                const newParent = query(`.tasks [data-index="${taskIndex}"`); // change this later to display selectedQuestIndex quest instead of currently dragged quest
-                // const newButton = query('.quest-select', newParent);
                 this.#currDraggedIndex = taskIndex; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
             }
         });
