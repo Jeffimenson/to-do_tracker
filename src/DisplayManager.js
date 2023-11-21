@@ -340,7 +340,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         this.selectedQuestIndex = index; 
     }
 
-    #currDraggedIndex;
+    #currDraggedIndex = null;
     #generateQuestEntry(quest, index, questGroup) {
         const entry = make('li'); 
         entry.dataset.index = index;
@@ -379,13 +379,16 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         // entry drag and drop code (works for completed quests too cause I think completed entries get moved to the reg quests list but are instantly sent back to completed list)
         entry.setAttribute("draggable", true);
         entry.addEventListener("dragenter", () => {
-            if (this.#currDraggedIndex !== index) {
+            if (this.#currDraggedIndex != null && this.#currDraggedIndex !== index) {
                 questGroup.moveQuest(this.#currDraggedIndex, index);
                 this.selectedQuestIndex = index;
                 this.displayQuests(questGroup);
 
                 this.#currDraggedIndex = index; // entry to drag associated with the currently moving quest has a new index now that entries are reloaded
             }
+        });
+        entry.addEventListener("dragend", () => {
+            this.#currDraggedIndex = null;
         });
         entry.addEventListener("dragstart", () => {
             this.#currDraggedIndex = index;
@@ -507,7 +510,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         );
     }
 
-    #currDraggedIndex;
+    #currDraggedIndex = null;
     #generateTaskEntry(quest, taskIndex) {
         const task = quest.tasks[taskIndex];
 
@@ -575,7 +578,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         // entry drag and drop code (works for completed quests too cause I think completed entries get moved to the reg quests list but are instantly sent back to completed list)
         entry.setAttribute("draggable", true);
         entry.addEventListener("dragenter", () => {
-            if (this.#currDraggedIndex !== taskIndex) {
+            if (this.#currDraggedIndex != null && this.#currDraggedIndex !== taskIndex) {
                 quest.moveTask(this.#currDraggedIndex, taskIndex);
                 this.displayTasks(quest);
 
@@ -585,6 +588,9 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         entry.addEventListener("dragstart", () => {
             this.#currDraggedIndex = taskIndex;
         })
+        entry.addEventListener("dragend", () => {
+            this.#currDraggedIndex = null;
+        });
 
         return entry;
 
