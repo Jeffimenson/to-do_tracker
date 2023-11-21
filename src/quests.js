@@ -1,4 +1,4 @@
-import { differenceInDays, compareAsc } from "date-fns";
+import { intervalToDuration, differenceInDays, compareAsc } from "date-fns";
 
 function getDaysOld(date){ //To be used to check if completed tasks and quests are older than 2 days
     const today = new Date();
@@ -11,6 +11,18 @@ function getDaysOld(date){ //To be used to check if completed tasks and quests a
         const result = differenceInDays(today, date);
         return (result + 1) * -1;
     }
+}
+
+function getDaysOldV2(date) {
+    const today = new Date();
+    const dueInFuture = quest.dueDate > today;
+    const timeDiff = intervalToDuration({
+        start: quest.dueDate,
+        end: today
+    });
+
+
+    return (dueInFuture)? timeDiff.days : - timeDiff.days;
 }
 
 class Task {
@@ -194,6 +206,11 @@ class QuestGroup {
             }
         }
     }
+
+    checkIfQuestDue(quest) {
+        const today = new Date();
+        return quest.dueDate < today;
+    }
 }
 
 
@@ -228,6 +245,8 @@ class StaticQuestGroup extends QuestGroup {
     makeQuest(name, tasks, due){
         const qst = new Quest(name, tasks, due);
         this.addQuest(qst);
+
+        return qst;
     }
 }
 

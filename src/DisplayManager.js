@@ -356,7 +356,11 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         const timeDisplay = make('button.due');
         entry.append(timeDisplay);
         if (hasDueDate) {
+            const isDue = questGroup.checkIfQuestDue(quest);
             timeDisplay.textContent = QGUIHandlers[questGroup.QGType].getTimeDisplayText(quest);
+            if (isDue) {
+                timeDisplay.classList.add("overdue");
+            }
         }
 
         const moreButton = make('button.more', entry);
@@ -806,11 +810,13 @@ class DisplayManager {
                 this.#questAdder.classList.toggle("selected");
                 // toggleClass(questPrompt, "activated");
                 this.#questPrompt.classList.toggle("activated");
-
+                
+                let quest;
                 if (questDue) {
-                    this.#selectedQuestGroup.makeQuest(questName, [], questDue);
+                    quest = this.#selectedQuestGroup.makeQuest(questName, [], questDue);
+                    console.log(this.#selectedQuestGroup.checkIfQuestDue(quest));
                 } else {
-                    this.#selectedQuestGroup.makeQuest(questName, []);
+                    quest = this.#selectedQuestGroup.makeQuest(questName, []);
                 }
                 // this.#selectedQuestGroup.makeQuest(questName, [], questDue);
                 this.#questsDisplayer.displayQuests(this.#selectedQuestGroup);

@@ -3,6 +3,8 @@
     --pip-darkened: #175a32;
     --pip-more-darker: #0d3521;
     --background-color: #01160a;
+    --overdue-light: rgb(199, 114, 114);
+    --overdue-dark: rgb(168, 38, 38);
 }
 
 html {
@@ -365,6 +367,15 @@ ul.quests li button.due {
 ul.quests li button.due:hover {
     background-color: var(--pip-green);
     color: var(--background-color);
+}
+
+ul.quests li button.due.overdue {
+    color: var(--overdue-dark);
+}
+ul.quests li button.due.overdue:hover {
+    background-color: var(--overdue-dark);
+    border-color: var(--overdue-dark);
+    color: var(--overdue-light);
 }
 
 button.more {
