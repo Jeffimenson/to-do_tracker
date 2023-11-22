@@ -246,7 +246,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
     #completedQuestList; 
     #questAdder;
     
-    selectedQuestIndex;
+    selectedQuestIndex = 0;
 
     #tasksDisplayer; // reference to task displayer from main displaymanager
 
@@ -302,6 +302,8 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
                 timeDisplay.textContent = QGUIHandlers[QGType].getTimeDisplayText(quest);
                 if (quest.isOverdue) {
                     timeDisplay.classList.add("overdue");
+                } else {
+                    timeDisplay.classList.remove("overdue");
                 }
             }
 
@@ -696,24 +698,27 @@ class DisplayManager {
         this.#questDueLabel.append(this.#QGUIHandler.getDueInput())
     }
     
+    displayQuestGroup(QGKey) {
+        const picker = this.#QGPickers[QGKey];
+        const chosenQG = this.#user.questGroups[QGKey];
+
+        if (chosenQG !== this.#selectedQuestGroup) {
+            query(".selected", this.#nav)?.classList.remove("selected");
+        }
+
+        this.#tasksDisplayer.clearDisplayedTasks();
+        this.#selectedQuestGroup = chosenQG;
+        this.#QGUIHandler = QGUIHandlers[this.#selectedQuestGroup.QGType];
+        picker.classList.add("selected");
+
+        this.#generateQuestPromptDueInput();
+
+        this.#questsDisplayer.displayQuests(chosenQG);
+    } 
+
     #functionizeQGPickers() {
         for (const [QGKey, picker] of Object.entries(this.#QGPickers)) {
-            picker.addEventListener('click', () => {
-                const chosenQG = this.#user.questGroups[QGKey];
-
-                if (chosenQG !== this.#selectedQuestGroup) {
-                    query(".selected", this.#nav)?.classList.remove("selected");
-                }
-
-                this.#tasksDisplayer.clearDisplayedTasks();
-                this.#selectedQuestGroup = chosenQG;
-                this.#QGUIHandler = QGUIHandlers[this.#selectedQuestGroup.QGType];
-                picker.classList.add("selected");
-
-                this.#generateQuestPromptDueInput();
-
-                this.#questsDisplayer.displayQuests(chosenQG);
-            }); 
+            picker.addEventListener('click', this.displayQuestGroup.bind(this, QGKey)); 
         }
     }
 
