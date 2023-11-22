@@ -86,6 +86,10 @@ class Quest {
         return this.#completionDate !== null;
     }
 
+    get isOverdue() {
+        return this.dueDate < new Date();
+    }
+
     constructor (name, tasks=[], dueDate=null){
         this.name = name; 
         this.#tasks = tasks;
@@ -207,10 +211,10 @@ class QuestGroup {
         }
     }
 
-    checkIfQuestDue(quest) {
-        const today = new Date();
-        return quest.dueDate < today;
-    }
+    // checkIfQuestDue(quest) {
+    //     const today = new Date();
+    //     return quest.dueDate < today;
+    // }
 }
 
 

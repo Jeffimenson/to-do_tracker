@@ -104,7 +104,6 @@ function getDailyHandler() {
         // const dueDisplay = make('button.due');
         // dueDisplay.textContent = formatDateToTime(quest.dueDate);
         // return dueDisplay;
-        console.log(quest.dueDate);
         return formatDateToTime(quest.dueDate);
     }; 
 
@@ -168,7 +167,6 @@ function getWeeklyHandler() {
             minute = 0;
         } 
         const selectedDay = weekInput.dataset.selectedDay;
-        console.log(selectedDay);
         const questDue = WeeklyTime(selectedDay, +hour, +minute);
 
         if (questName.length > 0 && selectedDay !== "") {
@@ -356,9 +354,8 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         const timeDisplay = make('button.due');
         entry.append(timeDisplay);
         if (hasDueDate) {
-            const isDue = questGroup.checkIfQuestDue(quest);
             timeDisplay.textContent = QGUIHandlers[questGroup.QGType].getTimeDisplayText(quest);
-            if (isDue) {
+            if (quest.isOverdue) {
                 timeDisplay.classList.add("overdue");
             }
         }
@@ -814,7 +811,7 @@ class DisplayManager {
                 let quest;
                 if (questDue) {
                     quest = this.#selectedQuestGroup.makeQuest(questName, [], questDue);
-                    console.log(this.#selectedQuestGroup.checkIfQuestDue(quest));
+                    // console.log(this.#selectedQuestGroup.checkIfQuestDue(quest));
                 } else {
                     quest = this.#selectedQuestGroup.makeQuest(questName, []);
                 }
