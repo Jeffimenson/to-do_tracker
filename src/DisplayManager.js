@@ -300,6 +300,9 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
             if (newDue) {
                 quest.dueDate = newDue;
                 timeDisplay.textContent = QGUIHandlers[QGType].getTimeDisplayText(quest);
+                if (quest.isOverdue) {
+                    timeDisplay.classList.add("overdue");
+                }
             }
 
             holder.remove();
@@ -308,6 +311,15 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         // editor.addEventListener('focusout', submitEdit);
         editsubmitter.addEventListener('click', submitEdit);
         editor.addEventListener('keydown', (e) => { if (e.keyCode === 13) submitEdit() });
+
+        const closeOutFunc = (e) => {
+            if (!holder.contains(e.target)){
+                submitEdit();
+            }
+            window.removeEventListener('pointerdown', closeOutFunc);
+        }
+        window.addEventListener('pointerdown', closeOutFunc);
+
     }
 
     #toggleQuestOptions(optionsDisplay) {
@@ -394,6 +406,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         entry.addEventListener("dragstart", () => {
             this.#currDraggedIndex = index;
         })
+
 
         return entry;
     }
