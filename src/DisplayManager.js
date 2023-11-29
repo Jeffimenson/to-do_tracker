@@ -307,6 +307,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
                 }
             }
 
+            window.removeEventListener('pointerdown', closeOutFunc);
             holder.remove();
         };
 
@@ -316,9 +317,9 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
         const closeOutFunc = (e) => {
             if (!holder.contains(e.target)){
+            console.log(holder.contains(e.target));
                 submitEdit();
             }
-            window.removeEventListener('pointerdown', closeOutFunc);
         }
         window.addEventListener('pointerdown', closeOutFunc);
 
