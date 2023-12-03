@@ -17,6 +17,30 @@ function fixDate(input) {
   return date;
 }
 
+let localStorage =  window.localStorage;
+
+let user = null; // user object for storing quests and tasks data
+
+function saveUserQuests() {
+    const userData = {};
+    for (const [key, val] of Object.entries(user.questGroups)) {
+        const currQG = val; 
+        const questArray = [];
+
+        for (let i = 0; i < currQG.quests.length; i++){
+            const flatQuest = currQG.quests[i];
+            questArray.push(flatQuest);
+        }
+
+        userData[key] = questArray;
+        // localStorage.setItem(key, JSON.stringify(questArray));
+    }
+
+    localStorage.setItem("user", JSON.stringify(userData));
+
+    return userData;
+}
+
 // For handling different kinds of input methods for the different quest groups
 function getStaticHandler() {
     const getDueInput = () => {
@@ -438,7 +462,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         }
 
         if (!selectedAQuest) this.#tasksDisplayer.clearDisplayedTasks(); 
-
+        saveUserQuests();
 
     }
 }
@@ -624,6 +648,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
                 this.#taskList.append(entry);
             }
         }
+        saveUserQuests();
     }
 }
 
@@ -660,8 +685,8 @@ class DisplayManager {
     #questDueLabel; 
     #submitQuest;
 
-    constructor (user, nav, rightSection, leftSection) {
-        this.#user = user;
+    constructor (usr, nav, rightSection, leftSection) {
+        user = usr; 
 
         this.#makeActionButtons(rightSection); // For buttons on the right section that adds tasks and completes quests
 
@@ -701,7 +726,7 @@ class DisplayManager {
     
     displayQuestGroup(QGKey) {
         const picker = this.#QGPickers[QGKey];
-        const chosenQG = this.#user.questGroups[QGKey];
+        const chosenQG = user.questGroups[QGKey];
 
         if (chosenQG !== this.#selectedQuestGroup) {
             query(".selected", this.#nav)?.classList.remove("selected");

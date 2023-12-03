@@ -176,7 +176,6 @@ class QuestGroup {
     }
     
     addQuest(newQuest){
-        console.log(this.#quests);
         this.#quests.unshift(newQuest);
     }
 

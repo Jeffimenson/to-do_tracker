@@ -32,25 +32,6 @@ const QG = {
 };
 
 
-function saveUserQuests(user) {
-    const userData = {};
-    for (const [key, val] of Object.entries(user.questGroups)) {
-        const currQG = val; 
-        const questArray = [];
-
-        for (let i = 0; i < currQG.quests.length; i++){
-            const flatQuest = currQG.quests[i];
-            questArray.push(flatQuest);
-        }
-
-        userData[key] = questArray;
-        // localStorage.setItem(key, JSON.stringify(questArray));
-    }
-
-    localStorage.setItem("user", JSON.stringify(userData));
-
-    return userData;
-}
 
 function retrieveUserData() {
     const qgs = {}
@@ -73,7 +54,8 @@ function retrieveUserData() {
                 thickTasks.push(task);
             }
 
-            const thickQuest = new Quest(flatQuest.name, thickTasks);
+            const due = (flatQuest.dueDate) ? new Date(flatQuest.dueDate) : null;
+            const thickQuest = new Quest(flatQuest.name, thickTasks, due);
             thickQuests.push(thickQuest);
         }
 
@@ -116,4 +98,3 @@ console.log(user);
 const DM = new DisplayManager(user, nav, rightSection, leftSection); 
 DM.displayQuestGroup(QG.static);
 
-// saveUserQuests(user); 
