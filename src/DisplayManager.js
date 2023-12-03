@@ -29,6 +29,10 @@ function saveUserQuests() {
 
         for (let i = 0; i < currQG.quests.length; i++){
             const flatQuest = currQG.quests[i];
+            if (Object.prototype.toString.call(flatQuest.dueDate) === '[object Date]') {
+                console.log(flatQuest.dueDate);
+                flatQuest.dueDate = flatQuest.dueDate.getTime(); 
+            }
             questArray.push(flatQuest);
         }
 
@@ -331,6 +335,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
                 }
             }
 
+            saveUserQuests();
             window.removeEventListener('pointerdown', closeOutFunc);
             holder.remove();
         };
@@ -520,6 +525,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
             entryLabelText.textContent = task.description;
             entry.classList.remove('hidden');
             
+            saveUserQuests();
             editor.remove();
         };
 

@@ -54,7 +54,7 @@ function retrieveUserData() {
                 thickTasks.push(task);
             }
 
-            const due = (flatQuest.dueDate) ? new Date(flatQuest.dueDate) : null;
+            const due = (flatQuest.dueDate) ? new Date(parseInt(flatQuest.dueDate)) : null;
             const thickQuest = new Quest(flatQuest.name, thickTasks, due);
             thickQuests.push(thickQuest);
         }
