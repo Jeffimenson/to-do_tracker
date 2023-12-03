@@ -65,16 +65,12 @@ class Quest {
     }
 
 
-    #tasks = [];
-
-    get tasks (){
-        return this.#tasks;
-    }
+    tasks = [];
 
     get completedTasks (){
         const completed = [];
-        for (let i = 0; i < this.#tasks.length; i++){
-            const task = this.#tasks[i];
+        for (let i = 0; i < this.tasks.length; i++){
+            const task = this.tasks[i];
             if (task.completionDate !== null){
                 completed.push(task);
             }
@@ -92,7 +88,7 @@ class Quest {
 
     constructor (name, tasks=[], dueDate=null){
         this.name = name; 
-        this.#tasks = tasks;
+        this.tasks = tasks;
         this.dueDate = dueDate;
     }
 
@@ -105,7 +101,7 @@ class Quest {
     }
 
     resetTasks(){
-        for (let i = 0; i < this.#tasks.length; i++){
+        for (let i = 0; i < this.tasks.length; i++){
             if (task.completionDate !== null){
                 this.decompleteTask(i);
             }
@@ -113,34 +109,34 @@ class Quest {
     }
 
     removeTask(index){
-        this.#tasks.splice(index, 1);
+        this.tasks.splice(index, 1);
     } 
 
     addTask(task){
         if (this.shouldBeComplete()) {
             this.resetCompletion();
         }
-        this.#tasks.push(task);
+        this.tasks.push(task);
     }
 
     moveTask(fromIndex, toIndex){
-        const task = this.#tasks[fromIndex];
+        const task = this.tasks[fromIndex];
         this.removeTask(fromIndex);
-        this.#tasks.splice(toIndex, 0, task);
+        this.tasks.splice(toIndex, 0, task);
     }
 
     completeTask(index){
-        const task = this.#tasks[index];
+        const task = this.tasks[index];
         task.trackCompletionDate();
     }
     
     decompleteTask(index){
-        const task = this.#tasks[index];
+        const task = this.tasks[index];
         this.#completionDate = null;
     }
     
     shouldBeComplete(){
-        return this.#tasks.length === this.completedTasks.length;
+        return this.tasks.length === this.completedTasks.length;
     }
 
     trackCompletionDate(){
@@ -154,8 +150,16 @@ class Quest {
 
 class QuestGroup {
     #quests = [];
+    
+    get quests () {
+        return this.#quests;
+    }
 
-    constructor(){}
+    constructor(quests) {
+        if (quests) {
+            this.#quests = quests;
+        }
+    }
 
     get quests (){
         return this.#quests;
@@ -172,6 +176,7 @@ class QuestGroup {
     }
     
     addQuest(newQuest){
+        console.log(this.#quests);
         this.#quests.unshift(newQuest);
     }
 
