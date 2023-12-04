@@ -106,6 +106,7 @@ class Quest {
 
     resetTasks(){
         for (let i = 0; i < this.tasks.length; i++){
+            const task = this.tasks[i];
             if (task.completionDate !== null){
                 this.decompleteTask(i);
             }
@@ -136,7 +137,7 @@ class Quest {
     
     decompleteTask(index){
         const task = this.tasks[index];
-        this.completionDate = null;
+        task.resetCompletion();
     }
     
     shouldBeComplete(){

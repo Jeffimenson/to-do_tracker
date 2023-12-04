@@ -96,6 +96,7 @@ const nav = body.querySelector('nav');
 
 // localStorage.clear();
 const user = retrieveUserData();
+// user.questGroups.daily.resetQuests();
 // createTestQuests(user);
 
 const DM = new DisplayManager(user, nav, rightSection, leftSection); 
