@@ -28,11 +28,7 @@ function saveUserQuests() {
         const questArray = [];
 
         for (let i = 0; i < currQG.quests.length; i++){
-            const flatQuest = currQG.quests[i];
-            if (Object.prototype.toString.call(flatQuest.dueDate) === '[object Date]') {
-                console.log(flatQuest.dueDate);
-                flatQuest.dueDate = flatQuest.dueDate.getTime(); 
-            }
+            const flatQuest = currQG.quests[i].getFlatCopy();
             questArray.push(flatQuest);
         }
 
@@ -41,8 +37,6 @@ function saveUserQuests() {
     }
 
     localStorage.setItem("user", JSON.stringify(userData));
-
-    return userData;
 }
 
 // For handling different kinds of input methods for the different quest groups
@@ -76,10 +70,6 @@ function getStaticHandler() {
         return questDue;
     }
     const getTimeDisplayText = (quest) => {
-        // const dueDisplay = make('button.due');
-        // dueDisplay.textContent = formatDate(quest.dueDate);
-        // return dueDisplay;
-
         return formatDate(quest.dueDate);
     }; 
 
@@ -129,9 +119,6 @@ function getDailyHandler() {
 
     }
     const getTimeDisplayText = (quest) => {
-        // const dueDisplay = make('button.due');
-        // dueDisplay.textContent = formatDateToTime(quest.dueDate);
-        // return dueDisplay;
         return formatDateToTime(quest.dueDate);
     }; 
 
@@ -230,8 +217,9 @@ function getWeeklyHandler() {
 
     }
     const getTimeDisplayText = (quest) => {
-        const day = _dayIndices[quest.dueDate.getDay()];
-        const time = formatDateToTime(quest.dueDate);
+        const due = quest.dueDate; 
+        const day = _dayIndices[due.getDay()];
+        const time = formatDateToTime(due);
 
         return `${day} ${time}`;
     }; 
@@ -346,7 +334,6 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
 
         const closeOutFunc = (e) => {
             if (!holder.contains(e.target)){
-            console.log(holder.contains(e.target));
                 submitEdit();
             }
         }
@@ -397,6 +384,7 @@ class QuestsDisplayer { // For purely converting user quest data into visual for
         const hasDueDate = quest.dueDate != null;
         const timeDisplay = make('button.due');
         entry.append(timeDisplay);
+       
         if (hasDueDate) {
             timeDisplay.textContent = QGUIHandlers[questGroup.QGType].getTimeDisplayText(quest);
             if (quest.isOverdue) {
@@ -620,6 +608,8 @@ class TasksDisplayer { // For purely converting user quest data into visual form
             if (!questStateChanged) {
                 this.#findPlaceToInsertTask(entry, nextList); 
             }
+
+            saveUserQuests();
         });
 
         // entry drag and drop code (works for completed quests too cause I think completed entries get moved to the reg quests list but are instantly sent back to completed list)
@@ -693,7 +683,6 @@ class DisplayManager {
 
     constructor (usr, nav, rightSection, leftSection) {
         user = usr; 
-
         this.#makeActionButtons(rightSection); // For buttons on the right section that adds tasks and completes quests
 
         this.#setupTaskDisplayer(rightSection); // tasks displayer must be made before quest displayer cause quest displayer references it 
@@ -745,6 +734,7 @@ class DisplayManager {
 
         this.#generateQuestPromptDueInput();
 
+        
         this.#questsDisplayer.displayQuests(chosenQG);
     } 
 
@@ -861,7 +851,6 @@ class DisplayManager {
                 let quest;
                 if (questDue) {
                     quest = this.#selectedQuestGroup.makeQuest(questName, [], questDue);
-                    // console.log(this.#selectedQuestGroup.checkIfQuestDue(quest));
                 } else {
                     quest = this.#selectedQuestGroup.makeQuest(questName, []);
                 }

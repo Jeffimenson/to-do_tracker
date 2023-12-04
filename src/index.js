@@ -1,6 +1,6 @@
 import './style.css';
 import DisplayManager from './DisplayManager';
-import { format, isToday, isThisWeek } from 'date-fns';
+import { format, isToday, isThisWeek, parse } from 'date-fns';
 import {make, query, toggleClass} from './jeffQuery.js';
 import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime} from './quests.js';
 
@@ -35,7 +35,7 @@ const QG = {
 
 function retrieveUserData() {
     const qgs = {}
-    let userData
+    let userData; 
     if (localStorage.getItem("user")) {
         userData = JSON.parse(localStorage.getItem("user"));
     } else {
@@ -50,20 +50,23 @@ function retrieveUserData() {
             const thickTasks = [];
             for (let j = 0; j < flatQuest.tasks.length; j++) {
                 const flatTask = flatQuest.tasks[j];
-                const task = new Task(flatTask.description, flatTask.isOptional);
+                const compDate = (flatTask.completionDate) ? new Date(parseInt(flatTask.completionDate)) : null;
+                const task = new Task(flatTask.description, flatTask.isOptional, compDate);
                 thickTasks.push(task);
             }
 
             const due = (flatQuest.dueDate) ? new Date(parseInt(flatQuest.dueDate)) : null;
-            const thickQuest = new Quest(flatQuest.name, thickTasks, due);
+            const compDate = (flatQuest.completionDate) ? new Date(parseInt(flatQuest.completionDate)) : null;
+
+            const thickQuest = new Quest(flatQuest.name, thickTasks, due, compDate);
             thickQuests.push(thickQuest);
         }
 
         qgs[key] = thickQuests;
     }
 
-
-    return new User(qgs.stat, qgs.daily, qgs.weekly);
+    const newUser = new User(qgs.stat, qgs.daily, qgs.weekly);
+    return newUser;
 }
 
 // test code
@@ -91,10 +94,11 @@ const leftSection = body.querySelector('section.left');
 const rightSection = body.querySelector('section.right');
 const nav = body.querySelector('nav');
 
+// localStorage.clear();
 const user = retrieveUserData();
 // createTestQuests(user);
-console.log(user);
 
 const DM = new DisplayManager(user, nav, rightSection, leftSection); 
 DM.displayQuestGroup(QG.static);
+
 

@@ -28,30 +28,36 @@ function getDaysOldV2(date) {
 class Task {
     description;
     isOptional;
-    #completionDate = null;
-    constructor (description, isOptional){
+    completionDate = null;
+    constructor (description, isOptional, compDate=null){
         this.description = description;
         this.isOptional = isOptional;
+        this.completionDate = compDate;
     }
 
-    get completionDate (){
-        return this.#completionDate;
-    }
 
     get isComplete () {
-        return this.#completionDate !== null;
+        return this.completionDate !== null;
     }
 
     complete(){
-        this.#completionDate = new Date();
+        this.completionDate = new Date();
     }
 
     resetCompletion(){
-        this.#completionDate = null;
+        this.completionDate = null;
     }
 
     beenCompleted(){
-        return getDaysOld(this.#completionDate) > 2; 
+        return getDaysOld(this.completionDate) > 2; 
+    }
+
+    getFlatCopy() {
+        return {
+            description: this.description,
+            isOptional: this.isOptional, 
+            completionDate: this?.completionDate?.getTime()
+        };
     }
 }
 
@@ -59,10 +65,7 @@ class Quest {
     name; 
 
     dueDate;
-    #completionDate = null;
-    get completionDate (){
-        return this.#completionDate;
-    }
+    completionDate = null;
 
 
     tasks = [];
@@ -79,25 +82,26 @@ class Quest {
     }
 
     get isComplete () {
-        return this.#completionDate !== null;
+        return this.completionDate !== null;
     }
 
     get isOverdue() {
         return this.dueDate < new Date();
     }
 
-    constructor (name, tasks=[], dueDate=null){
+    constructor (name, tasks=[], dueDate=null, compDate=null){
         this.name = name; 
         this.tasks = tasks;
         this.dueDate = dueDate;
+        this.completionDate = compDate;
     }
 
     complete(){
-        this.#completionDate = new Date(); 
+        this.completionDate = new Date(); 
     }
 
     resetCompletion(){
-        this.#completionDate = null;
+        this.completionDate = null;
     }
 
     resetTasks(){
@@ -132,7 +136,7 @@ class Quest {
     
     decompleteTask(index){
         const task = this.tasks[index];
-        this.#completionDate = null;
+        this.completionDate = null;
     }
     
     shouldBeComplete(){
@@ -140,11 +144,24 @@ class Quest {
     }
 
     trackCompletionDate(){
-        this.#completionDate = new Date();
+        this.completionDate = new Date();
     }
     
     beenCompleted(){
-        return getDaysOld(this.#completionDate) > 2; 
+        return getDaysOld(this.completionDate) > 2; 
+    }
+
+    getFlatCopy() {
+        const taskCopies = []; 
+        for (let i = 0; i < this.tasks.length; i++) {
+            taskCopies[i] = this.tasks[i].getFlatCopy();
+        }
+        return {
+            name: this.name,
+            tasks: taskCopies,
+            dueDate: this.dueDate?.getTime(), 
+            completionDate: this.completionDate?.getTime()
+        };
     }
 }
 
