@@ -37,6 +37,7 @@ function saveUserQuests() {
     }
 
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("last-save-date", (new Date()).getTime());
 }
 
 // For handling different kinds of input methods for the different quest groups
@@ -627,6 +628,7 @@ class TasksDisplayer { // For purely converting user quest data into visual form
         })
         entry.addEventListener("dragend", () => {
             this.#currDraggedIndex = null;
+            saveUserQuests();
         });
 
         return entry;
@@ -644,7 +646,6 @@ class TasksDisplayer { // For purely converting user quest data into visual form
                 this.#taskList.append(entry);
             }
         }
-        saveUserQuests();
     }
 }
 

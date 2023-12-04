@@ -1,6 +1,6 @@
 import './style.css';
 import DisplayManager from './DisplayManager';
-import { format, isToday, isThisWeek, parse } from 'date-fns';
+import { format, isToday, isThisWeek, parse, isSameWeek, isSameDay} from 'date-fns';
 import {make, query, toggleClass} from './jeffQuery.js';
 import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyTime, Day, WeeklyTime} from './quests.js';
 
@@ -86,7 +86,7 @@ function createTestQuests(user) {
 }
 
 
-
+const today = new Date();
 
 // NEW Dom generation code
 const body = query('body');
@@ -98,6 +98,18 @@ const nav = body.querySelector('nav');
 const user = retrieveUserData();
 // user.questGroups.daily.resetQuests();
 // createTestQuests(user);
+
+
+let lastSaveDate = localStorage.getItem("last-save-date");
+lastSaveDate = (lastSaveDate) ? new Date(parseInt(lastSaveDate)) : null; 
+
+if (!isSameWeek(today, lastSaveDate)) {
+    user.questGroups.weekly.resetQuests();
+}
+if (!isSameDay(today, lastSaveDate)) {
+    user.questGroups.daily.resetQuests();
+}
+
 
 const DM = new DisplayManager(user, nav, rightSection, leftSection); 
 DM.displayQuestGroup(QG.static);
