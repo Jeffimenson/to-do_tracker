@@ -244,6 +244,12 @@ section.left .quest-container {
     gap: 20px;
 }
 
+@media (max-width: 1279px) {
+    .quest-prompt-body {
+        padding: 5px 30px;
+    }
+}
+
 .quest-prompt-body label, .get-quest-name {
     display: inline-block;
     margin-right: 15px;
@@ -263,6 +269,7 @@ section.left .quest-container {
 
 .due-container {
     display: inline-flex;
+    flex-flow: row wrap;
     gap: 4px;
     margin-right: 16px;
 }
