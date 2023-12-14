@@ -54,6 +54,9 @@ input::placeholder {
 }
 
 /* Actual styling */
+html {
+    background-color: var(--background-color);
+}
 main {
     background-color: var(--background-color);
     color: var(--pip-green);
