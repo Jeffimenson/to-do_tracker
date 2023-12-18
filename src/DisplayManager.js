@@ -57,16 +57,23 @@ function getStaticHandler() {
         const dueInput = query('.quest-prompt .get-quest-due');
         const questDue = (Date.parse(fixDate(dueInput.value))) ? fixDate(dueInput.value) : null; // date parse can check if data is valid
         
+        questNameInput.addEventListener('change', () => {
+            if (questNameInput.value.length > 0) {
+                questNameInput.setCustomValidity("");
+            } else {
+                questNameInput.setCustomValidity("Quest needs a name!");
+            }
+        });
+
         if (questName.length > 0) {
             questNameInput.setCustomValidity("");
             submitButton.setAttribute("type", "reset");
             return [questName, questDue];
         } else {
             questNameInput.setCustomValidity("Quest needs a name!");
-            submitButton.setAttribute("type", "button");
+            submitButton.setAttribute("type", "submit");
             return [null, null];
         }
-
     };
     const getDueEditorVals = (dueEditor) => {
         const questDue = (Date.parse(fixDate(dueEditor.value))) ? fixDate(dueEditor.value) : null; // date parse can check if data is valid
@@ -104,6 +111,21 @@ function getDailyHandler() {
         const [hour, minute] = dueInput.value.split(':');
         const questDue = DailyTime(hour, minute);
 
+        questNameInput.addEventListener('change', () => {
+            if (questNameInput.value.length > 0) {
+                questNameInput.setCustomValidity("");
+            } else {
+                questNameInput.setCustomValidity("Quest needs a name!");
+            }
+        });
+
+        dueInput.addEventListener('change', () => {
+            if (dueInput.value.length > 0) {
+                dueInput.setCustomValidity("");
+            } else {
+                dueInput.setCustomValidity("Quest needs a name!");
+            }
+        });
 
         if (questName.length > 0 && dueInput.value.length > 0) {
             dueInput.setCustomValidity("");
@@ -113,11 +135,15 @@ function getDailyHandler() {
         } else {
             if (dueInput.value.length <= 0) {
                 dueInput.setCustomValidity("Needs a time!");
+            } else {
+                dueInput.setCustomValidity("");
             }
             if (questName.length <= 0) {
                 questNameInput.setCustomValidity("Quest needs a name!");
+            } else {
+                questNameInput.setCustomValidity("");
             }
-            submitButton.setAttribute("type", "button");
+            submitButton.setAttribute("type", "submit");
             return [null, null];
         }
         
@@ -162,10 +188,12 @@ function getWeeklyHandler() {
             if (lastSelect) {
                 lastSelect.classList.remove('selected');
                 if (lastSelect.dataset.dayId === but.dataset.dayId) {
+                    container.classList.add('invalid');
                     container.dataset.selectedDay = ""; 
                     return;
                 }
             }
+            container.classList.remove('invalid');
             container.dataset.selectedDay = Day[dayName];
             but.classList.add('selected');
         });
@@ -200,6 +228,22 @@ function getWeeklyHandler() {
         const selectedDay = weekInput.dataset.selectedDay;
         const questDue = WeeklyTime(selectedDay, +hour, +minute);
 
+        questNameInput.addEventListener('change', () => {
+            if (questNameInput.value.length > 0) {
+                questNameInput.setCustomValidity("");
+            } else {
+                questNameInput.setCustomValidity("Quest needs a name!");
+            }
+        });
+
+        timeInput.addEventListener('change', () => {
+            if (timeInput.value.length > 0) {
+                timeInput.setCustomValidity("");
+            } else {
+                timeInput.setCustomValidity("Quest needs a name!");
+            }
+        });
+
         if (questName.length > 0 && selectedDay !== "" && timeInput.value.length > 0) {
             timeInput.setCustomValidity("");
             questNameInput.setCustomValidity("");
@@ -212,14 +256,21 @@ function getWeeklyHandler() {
         } else {
             if (timeInput.value.length <= 0) {
                 timeInput.setCustomValidity("Quest needs a time");
+            } else {
+                timeInput.setCustomValidity("");
             }
             if (selectedDay === "") {
                 weekInput.classList.add('invalid');
+                questNameInput.setCustomValidity("Needs a week!");
+            } else {
+                weekInput.classList.remove('invalid');
             }
             if (questName.length <= 0) {
                 questNameInput.setCustomValidity("Needs a name!");
+            } else {
+                questNameInput.setCustomValidity("");
             }
-            submitButton.setAttribute("type", "button");
+            submitButton.setAttribute("type", "submit");
             return [null, null];
         }
 
