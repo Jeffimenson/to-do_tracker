@@ -6,9 +6,20 @@ import {Task, Quest, StaticQuestGroup, DailyQuestGroup, WeeklyQuestGroup, DailyT
 
 // Date formating functions
 function formatFullDate(date){
-    return format(date, 'MM.dd.yy, hh:mm aa');
+    return format(date, 'MM.dd.yy, hh:mm:ss aa');
 }
 // ...
+
+// date handling 
+const dateDisplay = query('.date');
+const currDate = new Date();
+setInterval(() => {
+    currDate.setSeconds(currDate.getSeconds() + 1);
+    dateDisplay.textContent = formatFullDate(currDate);
+
+}, 1000);
+
+// ... 
 
 const localStorage = window.localStorage;
 
@@ -30,8 +41,6 @@ const QG = {
     daily: "daily",
     weekly: "weekly"
 };
-
-
 
 function retrieveUserData() {
     const qgs = {}
