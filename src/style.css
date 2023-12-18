@@ -33,6 +33,10 @@ button, input, label {
     display: block;
 }
 
+input:invalid {
+    box-shadow: 0 0 0 2px red;
+}
+
 button:active, input:active, label:active{
     cursor: default;
 }
@@ -275,6 +279,10 @@ section.left .quest-container {
     flex-flow: row wrap;
     gap: 4px;
     margin-right: 16px;
+}
+
+.due-container.invalid .due-day-getter{
+    box-shadow: 0 0 0 2px red;
 }
 
 .due-container .due-day-getter {

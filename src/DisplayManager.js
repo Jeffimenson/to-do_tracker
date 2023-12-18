@@ -58,11 +58,14 @@ function getStaticHandler() {
         const questDue = (Date.parse(fixDate(dueInput.value))) ? fixDate(dueInput.value) : null; // date parse can check if data is valid
         
         if (questName.length > 0) {
+            questNameInput.setCustomValidity("");
             submitButton.setAttribute("type", "reset");
             return [questName, questDue];
+        } else {
+            questNameInput.setCustomValidity("Quest needs a name!");
+            submitButton.setAttribute("type", "button");
+            return [null, null];
         }
-        submitButton.setAttribute("type", "button");
-        return [null, null];
 
     };
     const getDueEditorVals = (dueEditor) => {
@@ -83,6 +86,7 @@ function getStaticHandler() {
     };
 }
 
+
 function getDailyHandler() {
     const getDueInput = () => {
         const questDueInput = make('input.get-quest-due'); 
@@ -100,12 +104,23 @@ function getDailyHandler() {
         const [hour, minute] = dueInput.value.split(':');
         const questDue = DailyTime(hour, minute);
 
+
         if (questName.length > 0 && dueInput.value.length > 0) {
+            dueInput.setCustomValidity("");
+            questNameInput.setCustomValidity("");
             submitButton.setAttribute("type", "reset");
             return [questName, questDue];
+        } else {
+            if (dueInput.value.length <= 0) {
+                dueInput.setCustomValidity("Needs a time!");
+            }
+            if (questName.length <= 0) {
+                questNameInput.setCustomValidity("Quest needs a name!");
+            }
+            submitButton.setAttribute("type", "button");
+            return [null, null];
         }
-        submitButton.setAttribute("type", "button");
-        return [null, null];
+        
     };
     const getDueEditorVals = (dueEditor) => {
         if (dueEditor.value.length === 0) {
@@ -185,15 +200,28 @@ function getWeeklyHandler() {
         const selectedDay = weekInput.dataset.selectedDay;
         const questDue = WeeklyTime(selectedDay, +hour, +minute);
 
-        if (questName.length > 0 && selectedDay !== "") {
+        if (questName.length > 0 && selectedDay !== "" && timeInput.value.length > 0) {
+            timeInput.setCustomValidity("");
+            questNameInput.setCustomValidity("");
+            weekInput.classList.remove('invalid');
             submitButton.setAttribute("type", "reset");
             weekInput.dataset.selectedDay = "";
             const lastSelect = query('.quest-prompt .due-day-getter.selected');
             if (lastSelect) lastSelect.classList.remove('selected');
             return [questName, questDue];
+        } else {
+            if (timeInput.value.length <= 0) {
+                timeInput.setCustomValidity("Quest needs a time");
+            }
+            if (selectedDay === "") {
+                weekInput.classList.add('invalid');
+            }
+            if (questName.length <= 0) {
+                questNameInput.setCustomValidity("Needs a name!");
+            }
+            submitButton.setAttribute("type", "button");
+            return [null, null];
         }
-        submitButton.setAttribute("type", "button");
-        return [null, null];
 
     };
     const getDueEditorVals = (dueEditor) => {
@@ -749,6 +777,7 @@ class DisplayManager {
         if (this.#questsDisplayer.selectedQuestIndex != undefined) { // I dont use strict comparison here cause null == undefined only and not anything else
             const taskList = query("ul.tasks");
             const wrapperForm = make("form#task-adder-form", taskList);
+            wrapperForm.setAttribute('novalidate', true);
             wrapperForm.setAttribute("onsubmit", "return false"); // Might have to change this if I actually make this submit somewhere
 
             const newTaskInput = make("input#create-new-task", wrapperForm);
